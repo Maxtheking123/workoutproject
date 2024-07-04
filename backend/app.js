@@ -1,14 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const calendarRoutes = require('./routes/calendarRoutes');
-const path = require('path');
+const authMiddleware = require('./middleware/authMiddleware');
 
 dotenv.config();
 
 const app = express();
+
+// Enable CORS
+app.use(cors());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
@@ -18,11 +22,12 @@ mongoose.connect(process.env.MONGO_URI, {
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-app.use(bodyParser.json());
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 // API routes
 app.use('/api/auth', authRoutes);
-app.use('/api/calendar', calendarRoutes);
+app.use('/api/calendar', authMiddleware, calendarRoutes);  // Protect calendar routes with authMiddleware
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../frontend/build')));
