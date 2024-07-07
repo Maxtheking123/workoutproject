@@ -17,6 +17,9 @@ const CalendarEntrySchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    category: {
+        type: String
+    },
     createdAt: {
         type: Date,
         default: Date.now

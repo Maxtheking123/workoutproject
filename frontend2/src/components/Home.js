@@ -13,6 +13,7 @@ const Home = () => {
     const [editingEntry, setEditingEntry] = useState(null);
     const [draggedEntry, setDraggedEntry] = useState(null);
     const entryRefs = useRef({});
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
     const daysForward = 6;
 
@@ -25,20 +26,28 @@ const Home = () => {
         getEntries();
     }, [fetchCalendarEntries]);
 
-    const updateSelectedCategory = (event) => {
-        var checkbox = ""
+    const updateSelectedCategory = () => {
         const checkboxIcons = document.querySelectorAll('.checkboxIcon');
+        let checkbox = "";
         for (let i = 0; i < checkboxIcons.length; i++) {
             if (checkboxIcons[i].style.opacity === "1") {
                 checkbox = checkboxIcons[i];
             }
         }
-        const checkboxContainer = checkbox.closest('.subcontainer');
-        console.log(checkboxContainer);
-        selectCategory.querySelector(".categoryColor").style.backgroundColor = checkboxContainer.querySelector(".categoryColor").style.backgroundColor;
-        selectCategory.querySelector(".categoryHeader").innerHTML = "Category";
-        selectCategory.querySelector(".categoryTitle").innerHTML = checkboxContainer.querySelector(".categoryTitle").innerHTML;
-    }
+        if (checkbox) {
+            const checkboxContainer = checkbox.closest('.categoryContainer');
+            const categoryID = checkboxContainer.getAttribute('data-id');
+            const categoryColor = checkboxContainer.querySelector(".categoryColor").style.backgroundColor;
+            const categoryTitle = checkboxContainer.querySelector(".categoryTitle").innerHTML;
+
+            const selectCategory = document.getElementById('selectCategory');
+            selectCategory.querySelector(".categoryColor").style.backgroundColor = categoryColor;
+            selectCategory.querySelector(".categoryHeader").innerHTML = "Category";
+            selectCategory.querySelector(".categoryTitle").innerHTML = categoryTitle;
+
+            setSelectedCategory(categoryID);
+        }
+    };
 
     useEffect(() => {
         const selectCategory = document.getElementById('selectCategory');
@@ -50,6 +59,9 @@ const Home = () => {
             selectCategory.querySelector(".categoryColor").style.backgroundColor = categories[0].color;
             selectCategory.querySelector(".categoryHeader").innerHTML = "Category";
             selectCategory.querySelector(".categoryTitle").innerHTML = categories[0].title;
+
+            const firstCategory = categories[0];
+            setSelectedCategory(firstCategory._id);
         }
         else {
             console.log('No checkboxes found');
@@ -61,7 +73,12 @@ const Home = () => {
 
     const handleAddEntry = async (e) => {
         e.preventDefault();
-        const addedEntry = await addCalendarEntry(newEntry);
+        if (!selectedCategory) {
+            alert("Please select a category");
+            return;
+        }
+        console.log('Selected category:', selectedCategory);
+        const addedEntry = await addCalendarEntry({ ...newEntry, category: selectedCategory });
         setEntries([...entries, addedEntry]);
         setNewEntry({ title: '', description: '', date: '', category: '' });
         cancel();
@@ -210,7 +227,19 @@ const weekDays = generateWeekDays();
 
 const groupedEntries = weekDays.map(day => ({
     ...day,
-    entries: filteredEntries.filter(entry => {
+    entries: filteredEntries.map(entry => {
+        const category = categories.find(cat => {
+            const categoryId = cat._id; // Extract the $oid value
+            console.log('Category ID:', entry.category);
+            return categoryId === entry.category;
+        });
+
+        return {
+            ...entry,
+            categoryColor: category ? category.color : '#373737',
+            categoryTitle: category ? category.title : 'No category'
+        };
+    }).filter(entry => {
         const entryDate = parseISO(entry.date);
         return entryDate.toDateString() === day.date.toDateString();
     })
@@ -226,13 +255,11 @@ const closeSelectCategory = () => {
 }
 
 const setCategory = (event) => {
-    //get the clicked categorys checkbox
     const allCheckboxes = document.querySelectorAll('.checkboxIcon');
 
     try {
         const subcontainer = event.target.closest('.subcontainer');
-
-        const checkbox = subcontainer.querySelector('.checkboxIcon')
+        const checkbox = subcontainer.querySelector('.checkboxIcon');
 
         console.log(checkbox);
         for (let i = 0; i < allCheckboxes.length; i++) {
@@ -243,7 +270,7 @@ const setCategory = (event) => {
     catch (error) {
         console.log('No category clicked');
     }
-}
+};
 
 const openCreateCategory = () => {
     document.getElementById('addCategoryForm').style.top = "0px";
@@ -276,10 +303,11 @@ return (
         ></div>
         <div className="eventsContainer">
             {groupedEntries.length > 0 ? groupedEntries.map(day => (
-                <div key={day.date.toISOString()} className="dayContainer hasEntries" data-date={day.date.toISOString()}>
+                <div key={day.date.toISOString()} className="dayContainer hasEntries"
+                     data-date={day.date.toISOString()}>
                     <div className="dayHeader dayTitleClass"
-                        onDragOver={(e) => onDragOver(e, draggedEntry)} // Use draggedEntry here
-                        onDrop={(e) => onDrop(e)}
+                         onDragOver={(e) => onDragOver(e, draggedEntry)} // Use draggedEntry here
+                         onDrop={(e) => onDrop(e)}
                     >{day.label}</div>
                     {day.entries.map(entry => (
                         <div
@@ -292,10 +320,13 @@ return (
                             onDragOver={(e) => onDragOver(e, entry)}
                             onDrop={(e) => onDrop(e)}
                             data-date={day.date.toISOString()}
+                            style={{backgroundColor: entry.categoryColor}}
                         >
                             <div className="eventHeaderTitle">{entry.title}</div>
                             <p className="eventDescription">{entry.description}</p>
-                            <button className="deleteButton" onClick={() => handleDeleteEntry(entry._id)}>Delete</button>
+                            <p className="eventCategory">{entry.categoryTitle}</p>
+                            <button className="deleteButton" onClick={() => handleDeleteEntry(entry._id)}>Delete
+                            </button>
                             <button className="editButton" onClick={() => handleEditEntry(entry)}>Edit</button>
                         </div>
                     ))}
@@ -316,8 +347,8 @@ return (
                     placeholder="Title"
                     value={editingEntry ? editingEntry.title : newEntry.title}
                     onChange={(e) => editingEntry
-                        ? setEditingEntry({ ...editingEntry, title: e.target.value })
-                        : setNewEntry({ ...newEntry, title: e.target.value })
+                        ? setEditingEntry({...editingEntry, title: e.target.value})
+                        : setNewEntry({...newEntry, title: e.target.value})
                     }
                     required
                 />
@@ -326,8 +357,8 @@ return (
                     placeholder="Description"
                     value={editingEntry ? editingEntry.description : newEntry.description}
                     onChange={(e) => editingEntry
-                        ? setEditingEntry({ ...editingEntry, description: e.target.value })
-                        : setNewEntry({ ...newEntry, description: e.target.value })
+                        ? setEditingEntry({...editingEntry, description: e.target.value})
+                        : setNewEntry({...newEntry, description: e.target.value})
                     }
                 />
                 <div className="date-input-container">
@@ -336,8 +367,8 @@ return (
                         className="date-input"
                         value={editingEntry ? editingEntry.date : newEntry.date}
                         onChange={(e) => editingEntry
-                            ? setEditingEntry({ ...editingEntry, date: e.target.value })
-                            : setNewEntry({ ...newEntry, date: e.target.value })
+                            ? setEditingEntry({...editingEntry, date: e.target.value})
+                            : setNewEntry({...newEntry, date: e.target.value})
                         }
                         required
                     />
@@ -364,21 +395,18 @@ return (
                             <button type="button" className="cancelButton">Cancel</button>
                         </div>
                         <p className="newSessionText">Select Category</p>
-                        <button className="submitButton" type="submit">{editingEntry ? 'Update' : 'Add'}</button>
+                        <button type="button" className="newCategory" onClick={openCreateCategory}>Add New</button>
                     </div>
                     <div id="categoryList" onClick={setCategory}>
-                            {categories.map(category => (
-                                <div key={category._id} className="categoryContainer">
-                                    <div className="categoryColor" style={{backgroundColor: category.color}}></div>
-                                    <div className="subcontainer">
-                                        <p className="categoryTitle">{category.title}</p>
-                                        <div className="checkboxIcon" style={{backgroundImage: `url(${checkIcon})`}}></div>
-                                    </div>
+                        {categories.map(category => (
+                            <div key={category._id} className="categoryContainer" data-id={category._id}>
+                                <div className="categoryColor" style={{backgroundColor: category.color}}></div>
+                                <div className="subcontainer">
+                                    <p className="categoryTitle">{category.title}</p>
+                                    <div className="checkboxIcon" style={{backgroundImage: `url(${checkIcon})`}}></div>
                                 </div>
-                            ))}
-                    </div>
-                    <div className="bottomButtons">
-                        <button type="button" className="newCategory" onClick={openCreateCategory}>New Category</button>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

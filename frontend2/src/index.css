@@ -62,13 +62,6 @@ button {
     color: white;
 }
 
-.bottomButtons {
-    display: flex;
-    justify-content: flex-end;
-    position: absolute;
-    bottom: 10vh;
-    width: calc(100% - 20px);
-}
 
 .newCategory{
     background: transparent;
@@ -422,4 +415,11 @@ input[type="text"] {
 #categoryTitleInput {
     width: calc(100% - 20px);
     margin-top: 10px;
+}
+
+.eventCategory {
+    font-family: "inter", sans-serif;
+    font-size: 16px;
+    font-weight: 200;
+    color: white;
 }

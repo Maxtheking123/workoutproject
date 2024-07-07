@@ -2,13 +2,15 @@ const CalendarEntry = require('../models/CalendarEntry');
 
 // Create a new calendar entry
 exports.createEntry = async (req, res) => {
-    const { title, description, date } = req.body;
+    console.log('creating entry:');
+    const { title, description, date, category } = req.body;
     try {
         const entry = new CalendarEntry({
             user: req.user.id,
             title,
             description,
-            date
+            date,
+            category
         });
         await entry.save();
         res.status(201).json(entry);
@@ -30,11 +32,11 @@ exports.getEntries = async (req, res) => {
 // Update a calendar entry
 exports.updateEntry = async (req, res) => {
     const { id } = req.params;
-    const { title, description, date } = req.body;
+    const { title, description, date, category } = req.body;
     try {
         const entry = await CalendarEntry.findOneAndUpdate(
             { _id: id, user: req.user.id },
-            { title, description, date },
+            { title, description, date, category },
             { new: true }
         );
         if (!entry) {
