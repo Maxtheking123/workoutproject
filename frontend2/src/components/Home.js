@@ -34,17 +34,19 @@ const Home = () => {
                 checkbox = checkboxIcons[i];
             }
         }
-        const checkboxContainer = checkbox.closest('.categoryContainer');
-        const categoryID = checkboxContainer.getAttribute('data-id');
-        const categoryColor = checkboxContainer.querySelector(".categoryColor").style.backgroundColor;
-        const categoryTitle = checkboxContainer.querySelector(".categoryTitle").innerHTML;
+        if (checkbox) {
+            const checkboxContainer = checkbox.closest('.categoryContainer');
+            const categoryID = checkboxContainer.getAttribute('data-id');
+            const categoryColor = checkboxContainer.querySelector(".categoryColor").style.backgroundColor;
+            const categoryTitle = checkboxContainer.querySelector(".categoryTitle").innerHTML;
 
-        const selectCategory = document.getElementById('selectCategory');
-        selectCategory.querySelector(".categoryColor").style.backgroundColor = categoryColor;
-        selectCategory.querySelector(".categoryHeader").innerHTML = "Category";
-        selectCategory.querySelector(".categoryTitle").innerHTML = categoryTitle;
+            const selectCategory = document.getElementById('selectCategory');
+            selectCategory.querySelector(".categoryColor").style.backgroundColor = categoryColor;
+            selectCategory.querySelector(".categoryHeader").innerHTML = "Category";
+            selectCategory.querySelector(".categoryTitle").innerHTML = categoryTitle;
 
-        setSelectedCategory(categoryID);
+            setSelectedCategory(categoryID);
+        }
     };
 
     useEffect(() => {
@@ -57,6 +59,9 @@ const Home = () => {
             selectCategory.querySelector(".categoryColor").style.backgroundColor = categories[0].color;
             selectCategory.querySelector(".categoryHeader").innerHTML = "Category";
             selectCategory.querySelector(".categoryTitle").innerHTML = categories[0].title;
+
+            const firstCategory = categories[0];
+            setSelectedCategory(firstCategory._id);
         }
         else {
             console.log('No checkboxes found');
@@ -390,7 +395,7 @@ return (
                             <button type="button" className="cancelButton">Cancel</button>
                         </div>
                         <p className="newSessionText">Select Category</p>
-                        <button className="submitButton" type="submit">{editingEntry ? 'Update' : 'Add'}</button>
+                        <button type="button" className="newCategory" onClick={openCreateCategory}>Add New</button>
                     </div>
                     <div id="categoryList" onClick={setCategory}>
                         {categories.map(category => (
@@ -402,9 +407,6 @@ return (
                                 </div>
                             </div>
                         ))}
-                    </div>
-                    <div className="bottomButtons">
-                        <button type="button" className="newCategory" onClick={openCreateCategory}>New Category</button>
                     </div>
                 </div>
             </div>
