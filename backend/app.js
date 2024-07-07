@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const calendarRoutes = require('./routes/calendarRoutes');
+const categoriesroutes = require('./routes/categoriesroutes');
 const authMiddleware = require('./middleware/authMiddleware');
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use(express.json());
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/categories', authMiddleware, categoriesroutes);
 app.use('/api/calendar', authMiddleware, calendarRoutes);  // Protect calendar routes with authMiddleware
 
 // Serve static files from the React app
