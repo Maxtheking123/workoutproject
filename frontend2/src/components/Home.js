@@ -34,11 +34,10 @@ const Home = () => {
             }
         }
         const checkboxContainer = checkbox.closest('.subcontainer');
-
-
-        selectCategory.querySelector(".categoryColor").style.backgroundColor = selectCategory.querySelector(".categoryColor").style.backgroundColor;
+        console.log(checkboxContainer);
+        selectCategory.querySelector(".categoryColor").style.backgroundColor = checkboxContainer.querySelector(".categoryColor").style.backgroundColor;
         selectCategory.querySelector(".categoryHeader").innerHTML = "Category";
-        selectCategory.querySelector(".categoryTitle").innerHTML = selectCategory.querySelector(".categoryTitle").innerHTML;
+        selectCategory.querySelector(".categoryTitle").innerHTML = checkboxContainer.querySelector(".categoryTitle").innerHTML;
     }
 
     useEffect(() => {
@@ -222,6 +221,7 @@ const openCategorySelection = () => {
 }
 
 const closeSelectCategory = () => {
+    updateSelectedCategory();
     document.getElementById('selectCategoryPage').style.top = "100svh"
 }
 
