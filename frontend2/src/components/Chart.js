@@ -2,9 +2,10 @@ import React from 'react';
 
 const Chart = () => {
   return (
-    <div>
-      <h2>Chart Component</h2>
-    </div>
+      <div>
+          <h2>Chart</h2>
+          <h2>Test</h2>
+      </div>
   );
 };
 
