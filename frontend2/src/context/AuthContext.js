@@ -91,6 +91,7 @@ const AuthProvider = ({ children }) => {
     };
 
     const addCalendarEntry = async (entry) => {
+        console.log('entry:', entry);
         try {
             const response = await axiosInstance.post('/api/calendar/entries', entry);
             return response.data;

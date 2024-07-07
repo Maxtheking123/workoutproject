@@ -423,3 +423,10 @@ input[type="text"] {
     width: calc(100% - 20px);
     margin-top: 10px;
 }
+
+.eventCategory {
+    font-family: "inter", sans-serif;
+    font-size: 16px;
+    font-weight: 200;
+    color: white;
+}
