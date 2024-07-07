@@ -1,11 +1,24 @@
 // src/components/Chart.js
-import React from 'react';
+import React, {useContext} from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import {AuthContext} from "../context/AuthContext";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Chart = () => {
+    const { fetchCalendarEntries, fetchCategoryEntries } = useContext(AuthContext);
+    const getEntries = async () => {
+        const fetchedEntries = await fetchCalendarEntries();
+        const fetchedCategories = await fetchCategoryEntries();
+        console.log('fetchedEntries:', fetchedEntries);
+        console.log('fetchedCategories:', fetchedCategories);
+
+
+    };
+
+    getEntries();
+
     const data = {
         labels: ['basket', 'rehab', 'gym'],
         datasets: [

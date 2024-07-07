@@ -90,6 +90,16 @@ const AuthProvider = ({ children }) => {
         }
     };
 
+    const fetchCategoryEntries = async () => {
+        try {
+            const response = await axiosInstance.get('/api/categories/entries');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching category entries:', error);
+            throw error;
+        }
+    };
+
     const addCalendarEntry = async (entry) => {
         console.log('entry:', entry);
         try {
@@ -126,7 +136,7 @@ const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, fetchCalendarEntries, addCalendarEntry, updateCalendarEntry, deleteCalendarEntry, categories, addCategory }}>
+        <AuthContext.Provider value={{ user, login, register, logout, fetchCalendarEntries, addCalendarEntry, updateCalendarEntry, deleteCalendarEntry, categories, addCategory, fetchCategoryEntries }}>
             {children}
         </AuthContext.Provider>
     );
