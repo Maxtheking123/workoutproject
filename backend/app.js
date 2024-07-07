@@ -32,11 +32,11 @@ app.use('/api/categories', authMiddleware, categoriesroutes);
 app.use('/api/calendar', authMiddleware, calendarRoutes);  // Protect calendar routes with authMiddleware
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+app.use(express.static(path.join(__dirname, '../frontend2/build')));
 
 // Handle React routing, return all requests to React app
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+    res.sendFile(path.join(__dirname, '../frontend2/build', 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;

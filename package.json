@@ -4,12 +4,12 @@
   "description": "A workout project",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
-    "start:frontend": "npm --prefix frontend start",
+    "start": "concurrently \"npm run start:frontend2\" \"npm run start:backend\"",
+    "start:frontend2": "npm --prefix frontend2 start",
     "start:backend": "npm --prefix backend start",
-    "test": "concurrently \"npm --prefix frontend test\" \"npm --prefix backend test\"",
+    "test": "concurrently \"npm --prefix frontend2 test\" \"npm --prefix backend test\"",
     "lint": "eslint .",
-    "build": "npm --prefix frontend run build"
+    "build": "npm --prefix frontend2 run build"
   },
   "keywords": [],
   "author": "",
