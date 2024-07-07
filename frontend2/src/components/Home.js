@@ -33,7 +33,7 @@ const Home = () => {
                 checkbox = checkboxIcons[i];
             }
         }
-        const checkboxContainer = checkbox.closest('.subcontainer');
+        const checkboxContainer = checkbox.closest('.categoryContainer');
         console.log(checkboxContainer);
         selectCategory.querySelector(".categoryColor").style.backgroundColor = checkboxContainer.querySelector(".categoryColor").style.backgroundColor;
         selectCategory.querySelector(".categoryHeader").innerHTML = "Category";
