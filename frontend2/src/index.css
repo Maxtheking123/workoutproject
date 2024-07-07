@@ -62,13 +62,6 @@ button {
     color: white;
 }
 
-.bottomButtons {
-    display: flex;
-    justify-content: flex-end;
-    position: absolute;
-    bottom: 10vh;
-    width: calc(100% - 20px);
-}
 
 .newCategory{
     background: transparent;
