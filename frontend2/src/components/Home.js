@@ -25,6 +25,22 @@ const Home = () => {
         getEntries();
     }, [fetchCalendarEntries]);
 
+    const updateSelectedCategory = (event) => {
+        var checkbox = ""
+        const checkboxIcons = document.querySelectorAll('.checkboxIcon');
+        for (let i = 0; i < checkboxIcons.length; i++) {
+            if (checkboxIcons[i].style.opacity === "1") {
+                checkbox = checkboxIcons[i];
+            }
+        }
+        const checkboxContainer = checkbox.closest('.subcontainer');
+
+
+        selectCategory.querySelector(".categoryColor").style.backgroundColor = selectCategory.querySelector(".categoryColor").style.backgroundColor;
+        selectCategory.querySelector(".categoryHeader").innerHTML = "Category";
+        selectCategory.querySelector(".categoryTitle").innerHTML = selectCategory.querySelector(".categoryTitle").innerHTML;
+    }
+
     useEffect(() => {
         const selectCategory = document.getElementById('selectCategory');
         const allCheckboxes = document.querySelectorAll('.checkboxIcon');
