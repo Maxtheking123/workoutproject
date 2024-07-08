@@ -23,16 +23,16 @@ const Chart = () => {
         console.log('fetchedEntries:', fetchedEntries);
         console.log('fetchedCategories:', fetchedCategories);
 
-        var timeFrame = 7;
+        var timeFrame = -7;
         const timeElement = document.getElementsByClassName('timeButton selected')[0];
         if (timeElement.id === 'lastMonth') {
-            timeFrame = 30;
+            timeFrame = -30;
         }
         if (timeElement.id === 'lastWeek') {
-            timeFrame = 7;
+            timeFrame = -7;
         }
         if (timeElement.id === 'nextWeek') {
-            timeFrame = -7;
+            timeFrame = 7;
         }
         // kollar vilka kategorier som används och sparar deras id
         const usedCategoryIds = []
@@ -152,7 +152,18 @@ const Chart = () => {
             label.innerHTML = 'No sessions';
             percentage.appendChild(label);
             // mörda barnen
-
+            Array.from(percentagesContainer.children).forEach(child => {
+                console.log('child:', child);
+                try{
+                    if (child.querySelector(".label").innerHTML === "No sessions") {
+                        percentagesContainer.removeChild(child);
+                    }
+                }
+                catch (e) {
+                    console.log(e);
+                }
+            });
+            // lägg till div
             percentagesContainer.appendChild(percentage);
         }
 
