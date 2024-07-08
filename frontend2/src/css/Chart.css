@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+#chartPage {
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    background: #181818;
+    flex-direction: column;
+    padding: 20px;
+}
+
+#chartContainer {
+    width: 60svw;
+    height: 60svw;
+    margin-bottom: 30px;
+}
+
+#percentagesContainer {
+    font-family: 'Inter', sans-serif;
+    color: white;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+#leftAlignedTextContainer {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+}
+
+.percentage {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    justify-content: space-between;
+}
+
+.color {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.label {
+    flex: 1;
+    font-weight: 200; /* Set the text boldness */
+    font-size: 18px;
+}
+
+.percentageNumber {
+    width: fit-content;
+    font-size: 18px;
+    font-weight: 200; /* Set the text boldness */
+    margin-left: auto;
+    margin-right: 6px;
+}
+
+#topContainer {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    margin-bottom: 20px;
+    flex-direction: column;
+
+    color: white;
+    font-family: "inter", sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+}
+
+#timeContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+#homeButtonContainer {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+#WorkoutsplitTitle {
+    font-size: 20px;
+    font-weight: 500;
+    color: white;
+    margin-bottom: 15px;
+}
+
+.timeButton {
+    background: #181818;
+    border: none;
+    color: white;
+    font-family: "inter", sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    padding: 3px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.timeButton.selected {
+    background: #515151;
+}
+
+#timeSinceLastTitle {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+#timeSinceLastContainer{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    color: white;
+    font-family: "inter", sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+}
+
+#timeSinceLastContainer > *:not(:first-child):not(:last-child){
+    border-bottom: 0.5px solid #ffffff1a;
+}
+
+.timeSinceLast{
+    font-size: 18px;
+    font-weight: 200;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding-bottom: 8px;
+}
