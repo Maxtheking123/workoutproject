@@ -13,6 +13,7 @@ const Chart = () => {
     // har lärt mig att det är typ som en global variabel
     const [chartData, setChartData] = useState(null);
     const [chartPercentages, setChartPercentages] = useState(null);
+    const [chartTitles, setChartTitles] = useState(null);
     const [timeSinceLast, setTimeSinceLast] = useState(null);
 
     const getEntries = async () => {
@@ -33,31 +34,48 @@ const Chart = () => {
         if (timeElement.id === 'nextWeek') {
             timeFrame = -7;
         }
-
         // kollar vilka kategorier som används och sparar deras id
         const usedCategoryIds = []
         for (const entry of fetchedEntries) {
-            if (new Date(entry.date) > new Date(new Date().getTime() + timeFrame * 24 * 60 * 60 * 1000)) {
-                continue;
-            }
             if (!usedCategoryIds.includes(entry.category)) {
                 usedCategoryIds.push(entry.category);
             }
         }
         console.log('usedCategoryIds:', usedCategoryIds);
 
-        // sparar kategorinamn utifrån id
-        const categoryLabels = []
-        for (const category of fetchedCategories) {
-            if (usedCategoryIds.includes(category._id)) {
-                categoryLabels.push(category.title);
+
+        const usedCategoryIdsInTimeframe = []
+        for (const entry of fetchedEntries) {
+            if (new Date(entry.date) > new Date(new Date().getTime() + timeFrame * 24 * 60 * 60 * 1000)) {
+                continue;
+            }
+            if (!usedCategoryIdsInTimeframe.includes(entry.category)) {
+                usedCategoryIdsInTimeframe.push(entry.category);
             }
         }
-        console.log('categoryLabels:', categoryLabels);
+        console.log('usedCategoryIdsInTimeframe:', usedCategoryIdsInTimeframe);
+
+        const chartTitles = []
+        for (const category of fetchedCategories) {
+            if (usedCategoryIds.includes(category._id)) {
+                chartTitles.push(category.title);
+            }
+        }
+        console.log('chartTitles:', chartTitles);
+        setChartTitles(chartTitles);
+
+        // sparar kategorinamn utifrån id
+        const categoryLabelsInTimeframe = []
+        for (const category of fetchedCategories) {
+            if (usedCategoryIdsInTimeframe.includes(category._id)) {
+                categoryLabelsInTimeframe.push(category.title);
+            }
+        }
+        console.log('categoryLabelsInTimeframe:', categoryLabelsInTimeframe);
 
         // räknar hur många gånger en kategori används
         const categoryCounts = []
-        for (const category of usedCategoryIds) {
+        for (const category of usedCategoryIdsInTimeframe) {
             let count = 0;
             for (const entry of fetchedEntries) {
                 if (entry.category === category) {
@@ -70,7 +88,7 @@ const Chart = () => {
 
         // sparar färgen på kategorin utifrån id
         const categoryColors = []
-        for (const category of usedCategoryIds) {
+        for (const category of usedCategoryIdsInTimeframe) {
             for (const fetchedCategory of fetchedCategories) {
                 if (category === fetchedCategory._id) {
                     categoryColors.push(fetchedCategory.color);
@@ -82,17 +100,61 @@ const Chart = () => {
 
 
         // sätter ihop allt till data
-        const data = {
-            labels: categoryLabels,
-            datasets: [
-                {
-                    data: categoryCounts,
-                    backgroundColor: categoryColors,
+        if (categoryLabelsInTimeframe.length !== 0) {
+            const data = {
+                labels: categoryLabelsInTimeframe,
+                datasets: [
+                    {
+                        data: categoryCounts,
+                        backgroundColor: categoryColors,
+                    }
+                ]
+            };
+            const percentagesContainer = document.getElementById('percentagesContainer');
+            // mörda barnen med innerHTML "No sessions"
+            Array.from(percentagesContainer.children).forEach(child => {
+                console.log('child:', child);
+                if (child.querySelector(".label").innerHTML === "No sessions") {
+                    percentagesContainer.removeChild(child);
                 }
-            ]
-        };
-        // detta ändrar den där globala variabeln högst up så det sparas typ
+            });
         setChartData(data);
+
+        }
+        else {
+            const data = {
+                labels: ['No data'],
+                datasets: [
+                    {
+                        data: [1],
+                        backgroundColor: ['#5C5C5C'],
+                    }
+                ]
+            };
+            // detta ändrar den där globala variabeln högst up så det sparas typ
+            setChartData(data);
+
+            const percentagesContainer = document.getElementById('percentagesContainer');
+
+            // skapar en div som säger att det inte finns någon data
+            const percentage = document.createElement('div');
+            percentage.className = 'percentage';
+            const color = document.createElement('div');
+            color.className = 'color';
+            color.style.backgroundColor = '#5C5C5C';
+            percentage.appendChild(color);
+            const percentageNumber = document.createElement('div');
+            percentageNumber.className = 'percentageNumber';
+            percentageNumber.innerHTML = '';
+            percentage.appendChild(percentageNumber);
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.innerHTML = 'No sessions';
+            percentage.appendChild(label);
+            // mörda barnen
+
+            percentagesContainer.appendChild(percentage);
+        }
 
         // räknar ut procenten
         const total = categoryCounts.reduce((a, b) => a + b, 0);
@@ -177,7 +239,7 @@ const Chart = () => {
                                 <div className="color"
                                      style={{backgroundColor: chartData.datasets[0].backgroundColor[index]}}></div>
                                 <div className="percentageNumber">{procentage.toFixed(0)}%</div>
-                                <div className="label">{chartData.labels[index]}</div>
+                                <div className="label">{chartTitles[index]}</div>
                             </div>
                         ))
                     ) : (
@@ -189,7 +251,7 @@ const Chart = () => {
                     {timeSinceLast ? (
                         timeSinceLast.map((time, index) => (
                             <div key={index} className="timeSinceLast" style={{display: time < 0 ? 'none' : 'flex' }}>
-                                <div className="label">{chartData.labels[index]}</div>
+                                <div className="label">{chartTitles[index]}</div>
                                 <div className="time">{time > -1 ? (time + (time === 1 ? ' day' : ' days')) : 'Never'}</div>
                             </div>
                         ))
