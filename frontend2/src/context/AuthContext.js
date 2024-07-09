@@ -44,9 +44,10 @@ const AuthProvider = ({ children }) => {
         const newCategory = { ...category, id: uuidv4() };
         try {
             const response = await axiosInstance.post('/api/categories/entries', newCategory);
+            setCategories(prevCategories => [...prevCategories, response.data]); // Update the categories state
             return response.data;
         } catch (error) {
-            console.error('Error adding calendar entry:', error);
+            console.error('Error adding category:', error);
             throw error;
         }
     };

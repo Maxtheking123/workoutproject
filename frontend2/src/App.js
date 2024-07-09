@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './components/Home';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -14,21 +14,27 @@ const App = () => {
     return (
         <AuthProvider>
             <Router>
-                <Navbar />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/chart" element={<Chart />} />
-                    <Route path="/calendar" element={
-                        <ProtectedRoute>
-                            <Calendar />
-                        </ProtectedRoute>
-                    } />
-                </Routes>
-                <Footer />
+                <Main />
             </Router>
         </AuthProvider>
+    );
+};
+
+const Main = () => {
+    const location = useLocation();
+
+    return (
+        <>
+            <Navbar />
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/chart" element={<Chart />} />
+                <Route path="/calendar" element={<Calendar />} />
+            </Routes>
+            {location.pathname === '/' && <Footer />}
+        </>
     );
 };
 

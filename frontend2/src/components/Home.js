@@ -18,13 +18,13 @@ const Home = () => {
     const daysForward = 6;
 
     useEffect(() => {
-        const getEntries = async () => {
-            const fetchedEntries = await fetchCalendarEntries();
-            setEntries(fetchedEntries);
-        };
+    const getEntries = async () => {
+        const fetchedEntries = await fetchCalendarEntries();
+        setEntries(fetchedEntries);
+    };
 
         getEntries();
-    }, [fetchCalendarEntries]);
+    }, [fetchCalendarEntries, categories]);
 
     const updateSelectedCategory = () => {
         const checkboxIcons = document.querySelectorAll('.checkboxIcon');
@@ -62,8 +62,7 @@ const Home = () => {
 
             const firstCategory = categories[0];
             setSelectedCategory(firstCategory._id);
-        }
-        else {
+        } else {
             console.log('No checkboxes found');
             selectCategory.querySelector(".categoryColor").style.backgroundColor = "#373737";
             selectCategory.querySelector(".categoryHeader").innerHTML = "";
@@ -105,6 +104,9 @@ const Home = () => {
         closeCreateCategory();
         const addedCategory = await addCategory(newCategory);
         setNewCategory({ title: '', color: '#F88D2B' }); // Reset color to default after adding
+
+        // Optionally, you can set the new category as the selected category
+        setSelectedCategory(addedCategory._id);
     };
 
     const cancel = () => {

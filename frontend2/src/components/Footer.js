@@ -24,7 +24,7 @@ const Footer = () => {
                         <li onClick={() => document.location.href = '/chart'}>
                             <div className="icon" style={{backgroundImage: `url(${chartSvg})`}}></div>
                         </li>
-                        <li onClick={() => document.location.href = '/calender'}>
+                        <li onClick={() => document.location.href = '/calendar'}>
                             <div className="icon" style={{backgroundImage: `url(${calendarSvg})`}}></div>
                         </li>
                     </div>

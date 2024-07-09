@@ -1,92 +1,69 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { Doughnut } from 'react-chartjs-2';
+import '../css/Calendar.css';
+import 'chart.js/auto';
 
 const Calendar = () => {
     const { fetchCalendarEntries, addCalendarEntry, updateCalendarEntry, deleteCalendarEntry } = useContext(AuthContext);
-    const [entries, setEntries] = useState([]);
-    const [newEntry, setNewEntry] = useState({ title: '', description: '', date: '' });
-    const [editingEntry, setEditingEntry] = useState(null);
+    const [daysInMonth, setDaysInMonth] = useState([]);
+    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
     useEffect(() => {
-        const getEntries = async () => {
-            const fetchedEntries = await fetchCalendarEntries();
-            setEntries(fetchedEntries);
-        };
+        populateCalendar(currentMonth, currentYear);
+    }, [currentMonth, currentYear]);
 
-        getEntries();
-    }, [fetchCalendarEntries]);
+    const populateCalendar = (month, year) => {
+        const firstDayOfMonth = new Date(year, month, 1).getDay(); // get the day of the week the month starts on
+        const daysInCurrentMonth = new Date(year, month + 1, 0).getDate(); // get the number of days in the month
 
-    const handleAddEntry = async (e) => {
-        e.preventDefault();
-        const addedEntry = await addCalendarEntry(newEntry);
-        setEntries([...entries, addedEntry]);
-        setNewEntry({ title: '', description: '', date: '' });
-    };
+        let daysArray = [];
+        for (let i = 0; i < firstDayOfMonth; i++) {
+            daysArray.push(null); // fill in empty slots for days before the 1st of the month
+        }
+        for (let i = 1; i <= daysInCurrentMonth; i++) {
+            daysArray.push(i);
+        }
 
-    const handleUpdateEntry = async (e) => {
-        e.preventDefault();
-        const updated = await updateCalendarEntry(editingEntry._id, editingEntry);
-        setEntries(entries.map(entry => (entry._id === editingEntry._id ? updated : entry)));
-        setEditingEntry(null);
-    };
+        setDaysInMonth(daysArray);
+    }
 
-    const handleDeleteEntry = async (id) => {
-        await deleteCalendarEntry(id);
-        setEntries(entries.filter(entry => entry._id !== id));
-    };
 
-    const handleEditEntry = (entry) => {
-        setEditingEntry(entry);
-    };
+    const renderDays = () => {
+        return daysInMonth.map((day, index) => (
+            <div key={index} className="dayContainer">
+                <div className="dayNumber">{day}</div>
+            </div>
+        ));
+    }
 
     return (
         <div>
             <h1>Calendar</h1>
-            <form onSubmit={editingEntry ? handleUpdateEntry : handleAddEntry}>
-                <input
-                    type="text"
-                    placeholder="Title"
-                    value={editingEntry ? editingEntry.title : newEntry.title}
-                    onChange={(e) => editingEntry
-                        ? setEditingEntry({ ...editingEntry, title: e.target.value })
-                        : setNewEntry({ ...newEntry, title: e.target.value })
-                    }
-                    required
-                />
-                <input
-                    type="text"
-                    placeholder="Description"
-                    value={editingEntry ? editingEntry.description : newEntry.description}
-                    onChange={(e) => editingEntry
-                        ? setEditingEntry({ ...editingEntry, description: e.target.value })
-                        : setNewEntry({ ...newEntry, description: e.target.value })
-                    }
-                />
-                <input
-                    type="date"
-                    value={editingEntry ? editingEntry.date : newEntry.date}
-                    onChange={(e) => editingEntry
-                        ? setEditingEntry({ ...editingEntry, date: e.target.value })
-                        : setNewEntry({ ...newEntry, date: e.target.value })
-                    }
-                    required
-                />
-                <button type="submit">{editingEntry ? 'Update Entry' : 'Add Entry'}</button>
-                {editingEntry && (
-                    <button type="button" onClick={() => setEditingEntry(null)}>Cancel</button>
-                )}
-            </form>
-
-            <div>
-                {entries.map(entry => (
-                    <div key={entry._id} style={{ border: '1px solid black', margin: '10px', padding: '10px' }}>
-                        <h2>{entry.title}</h2>
-                        <p>{entry.description}</p>
-                        <p>{new Date(entry.date).toLocaleDateString()}</p>
-                        <button onClick={() => handleEditEntry(entry)}>Edit</button>
-                        <button onClick={() => handleDeleteEntry(entry._id)}>Delete</button>
+            <div id="topButtons">
+                <div id="homeButton"></div>
+                <div id="secondTopRow">
+                    <div id="monthTitleContainer">
+                        <button onClick={() => setCurrentMonth(currentMonth - 1)}>Previous</button>
+                        <span>{new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' })} {currentYear}</span>
+                        <button onClick={() => setCurrentMonth(currentMonth + 1)}>Next</button>
                     </div>
-                ))}
+                </div>
+            </div>
+            <div id="calendarContainer">
+                <div id="daysOfWeekContainer">
+                    <div className="dayOfWeek">Mon</div>
+                    <div className="dayOfWeek">Tue</div>
+                    <div className="dayOfWeek">Wed</div>
+                    <div className="dayOfWeek">Thu</div>
+                    <div className="dayOfWeek">Fri</div>
+                    <div className="dayOfWeek">Sat</div>
+                    <div className="dayOfWeek">Sun</div>
+                </div>
+                <div id="calendarMonthContainer">
+                    {renderDays()}
+                </div>
             </div>
         </div>
     );
