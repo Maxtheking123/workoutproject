@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import Tasks from './components/Tasks';
 
 const App = () => {
     return (
@@ -32,6 +33,7 @@ const Main = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/chart" element={<Chart />} />
                 <Route path="/calendar" element={<Calendar />} />
+                <Route path="/tasks/:id" element={<Tasks />} />
             </Routes>
             {location.pathname === '/' && <Footer />}
         </>

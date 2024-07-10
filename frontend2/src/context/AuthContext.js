@@ -132,12 +132,53 @@ const AuthProvider = ({ children }) => {
         }
     };
 
+    const fetchTasks = async () => {
+        try {
+            const response = await axiosInstance.get('/api/tasks/entries');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching category entries:', error);
+            throw error;
+        }
+    };
+
+    const addTask = async (entry) => {
+        console.log('entry:', entry);
+        try {
+            const response = await axiosInstance.post('/api/tasks/entries', entry);
+            return response.data;
+        } catch (error) {
+            console.error('Error adding calendar entry:', error);
+            throw error;
+        }
+    };
+
+    const updateTask = async (id, entry) => {
+        try {
+            const response = await axiosInstance.put(`/api/tasks/entries/${id}`, entry);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating calendar entry:', error);
+            throw error;
+        }
+    };
+
+    const deleteTask = async (id) => {
+        try {
+            const response = await axiosInstance.delete(`/api/tasks/entries/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting calendar entry:', error);
+            throw error;
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, fetchCalendarEntries, addCalendarEntry, updateCalendarEntry, deleteCalendarEntry, categories, addCategory, fetchCategoryEntries }}>
+        <AuthContext.Provider value={{ user, login, register, logout, fetchCalendarEntries, addCalendarEntry, updateCalendarEntry, deleteCalendarEntry, categories, addCategory, fetchCategoryEntries, fetchTasks, addTask, updateTask, deleteTask }}>
             {children}
         </AuthContext.Provider>
     );

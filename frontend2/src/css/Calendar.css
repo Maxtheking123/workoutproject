@@ -1,13 +1,6 @@
 body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     color: white;
     font-family: "inter", sans-serif;
-    font-size: 18px;
-    font-weight: 300;
-    padding: 10px;
 }
 #calendarContainer {
     display: flex;
@@ -18,23 +11,62 @@ body {
     max-width: 400px;
     padding: 10px;
 }
-.dayContainer {
-    background: conic-gradient(
-    #f15854 25%,
-    #4d4d4d 0 25%,
-    #5da5da 0 50%
-  );
+
+.dayNumberSelected {
+    border: 3px solid rgba(175, 175, 175, 0.0);
+    border-radius: 50%;
+    width: 11vw;
+    height: 11vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dayNumberSelected.selected {
+    border: 3px solid rgba(175, 175, 175, 0.7);
+}
+
+.dayNumberContainer {
+    background: conic-gradient(#181818 0%, #181818 100%);
   border-radius: 50%;
     aspect-ratio: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 12svw;
-    height: 12svw;
-}
-.dayNumber{
     width: 10svw;
     height: 10svw;
+}
+.monthTitle {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.dayOfWeek {
+    text-align: center;
+}
+
+.backButton {
+    width: 14px;
+    height: 14px;
+    background: transparent;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.nextButton {
+    width: 14px;
+    height: 14px;
+    background: transparent;
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: rotate(180deg);
+}
+
+.dayNumber{
+    width: 8svw;
+    height: 8svw;
     background: #181818;
     border-radius: 50%;
     display: flex;
@@ -60,8 +92,36 @@ body {
 }
 
 #daysOfWeekContainer {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
     width: 100%;
+}
+
+.eventContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: 65px;
+    padding: 15px 30px 5px 30px;
+    background: #f88d2b;
+    border-radius: 8px;
+    position: relative;
     margin-bottom: 10px;
+}
+
+.eventHeaderTitle {
+    font-family: "inter", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.eventDescription {
+    font-family: "inter", sans-serif;
+    font-size: 16px;
+    font-weight: 200;
+    color: white;
 }

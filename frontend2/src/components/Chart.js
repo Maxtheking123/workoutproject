@@ -14,11 +14,12 @@ const Chart = () => {
     const [chartTitles, setChartTitles] = useState(null);
     const [timeSinceLast, setTimeSinceLast] = useState(null);
     const [timeFrame, setTimeFrame] = useState(-7);
+    const [allEntries, setAllEntries] = useState([]);
+    const [allCategories, setAllCategories] = useState([]);
 
     const updateTimeFrame = useCallback(() => {
         let newTimeFrame = -7;
         const timeElement = document.querySelector('.timeButton.selected');
-        console.log('timeElement:', timeElement);
         if (timeElement) {
             if (timeElement.id === 'lastMonth') {
                 newTimeFrame = -30;
@@ -31,31 +32,35 @@ const Chart = () => {
         }
     }, []);
 
-    const getEntries = useCallback(async (timeFrame) => {
-        const fetchedEntries = await fetchCalendarEntries();
-        const fetchedCategories = await fetchCategoryEntries();
-        console.log('fetchedEntries:', fetchedEntries);
-        console.log('fetchedCategories:', fetchedCategories);
+    const calculateTimeSinceLast = useCallback((entries, categories) => {
+        const timeSinceLast = categories.map(category => {
+            const lastEntry = entries
+                .filter(entry => entry.category === category._id)
+                .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+            return lastEntry ? Math.round((new Date() - new Date(lastEntry.date)) / 1000 / 60 / 60 / 24) : null;
+        });
 
+        setTimeSinceLast(timeSinceLast);
+    }, []);
+
+    const getEntries = useCallback((timeFrame) => {
         const currentDate = new Date();
         const targetDate = new Date(currentDate);
         targetDate.setDate(currentDate.getDate() + timeFrame);
-        console.log("current timeframe: ", timeFrame);
 
-        const filteredEntries = fetchedEntries.filter(entry => {
+        const filteredEntries = allEntries.filter(entry => {
             const entryDate = new Date(entry.date);
             return timeFrame > 0 ? entryDate <= targetDate && entryDate >= currentDate : entryDate >= targetDate && entryDate <= currentDate;
         });
 
         const usedCategoryIdsInTimeframe = [...new Set(filteredEntries.map(entry => entry.category))];
-        console.log('usedCategoryIdsInTimeframe:', usedCategoryIdsInTimeframe);
 
         const categoryLabelsInTimeframe = [];
         const categoryCounts = [];
         const categoryColors = [];
 
         usedCategoryIdsInTimeframe.forEach(categoryId => {
-            const category = fetchedCategories.find(cat => cat._id === categoryId);
+            const category = allCategories.find(cat => cat._id === categoryId);
             if (category) {
                 categoryLabelsInTimeframe.push(category.title);
                 categoryColors.push(category.color);
@@ -64,10 +69,6 @@ const Chart = () => {
             }
         });
         setChartTitles(categoryLabelsInTimeframe);
-
-        console.log('categoryLabelsInTimeframe:', categoryLabelsInTimeframe);
-        console.log('categoryCounts:', categoryCounts);
-        console.log('categoryColors:', categoryColors);
 
         if (categoryLabelsInTimeframe.length !== 0) {
             const data = {
@@ -97,16 +98,18 @@ const Chart = () => {
         const percentages = categoryCounts.map(count => (count / total) * 100);
         setChartPercentages(percentages);
 
-        const timeSinceLast = usedCategoryIdsInTimeframe.map(categoryId => {
-            const lastEntry = fetchedEntries
-                .filter(entry => entry.category === categoryId)
-                .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-            return lastEntry ? Math.round((new Date() - new Date(lastEntry.date)) / 1000 / 60 / 60 / 24) : null;
-        });
+    }, [allEntries, allCategories]);
 
-        console.log('timeSinceLast:', timeSinceLast);
-        setTimeSinceLast(timeSinceLast);
-    }, [fetchCalendarEntries, fetchCategoryEntries]);
+    useEffect(() => {
+        const fetchData = async () => {
+            const fetchedEntries = await fetchCalendarEntries();
+            const fetchedCategories = await fetchCategoryEntries();
+            setAllEntries(fetchedEntries);
+            setAllCategories(fetchedCategories);
+            calculateTimeSinceLast(fetchedEntries, fetchedCategories);
+        };
+        fetchData();
+    }, [fetchCalendarEntries, fetchCategoryEntries, calculateTimeSinceLast]);
 
     useEffect(() => {
         updateTimeFrame();
@@ -178,7 +181,7 @@ const Chart = () => {
                     {timeSinceLast ? (
                         timeSinceLast.map((time, index) => (
                             <div key={index} className="timeSinceLast" style={{display: time < 0 ? 'none' : 'flex' }}>
-                                <div className="label">{chartTitles[index]}</div>
+                                <div className="label">{allCategories[index]?.title}</div>
                                 <div className="time">{time > -1 ? (time + (time === 1 ? ' day' : ' days')) : 'Never'}</div>
                             </div>
                         ))

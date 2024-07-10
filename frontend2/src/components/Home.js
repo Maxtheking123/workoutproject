@@ -321,6 +321,7 @@ return (
                             onDragEnd={onDragEnd}
                             onDragOver={(e) => onDragOver(e, entry)}
                             onDrop={(e) => onDrop(e)}
+                            onClick={(e) => document.location.href = `/tasks/${entry._id}`}
                             data-date={day.date.toISOString()}
                             style={{backgroundColor: entry.categoryColor}}
                         >
