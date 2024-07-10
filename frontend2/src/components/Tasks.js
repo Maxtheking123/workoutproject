@@ -29,8 +29,9 @@ const Tasks = () => {
                 const entry = userEntries.find((entry) => entry._id === id);
                 const category = userCategories.find((category) => category._id === entry.category);
 
-                setCompletedTasks(userTasks.filter((task) => task.checked).length);
-                setTotalTasks(userTasks.length);
+                const filteredTasks = userTasks.filter((task) => task.entry === id);
+                setCompletedTasks(filteredTasks.filter((task) => task.checked).length);
+                setTotalTasks(filteredTasks.length);
 
                 setCategoryTitle(category.title);
                 setCategoryColor(category.color);
@@ -39,20 +40,19 @@ const Tasks = () => {
                 barHeader.textContent = category.title;
                 barHeader.style.color = category.color;
 
-                updateBar(category.color, userTasks.filter((task) => task.checked).length, userTasks.length, category.title);
+                updateBar(category.color, filteredTasks.filter((task) => task.checked).length, filteredTasks.length, category.title);
 
-                if (Array.isArray(userTasks)) {
-                    const filteredTasks = userTasks.filter((task) => task.entry === id);
+                if (Array.isArray(filteredTasks)) {
                     setTasks(filteredTasks);
                 } else {
-                    console.error('Expected an array of tasks, received:', userTasks);
+                    console.error('Expected an array of tasks, received:', filteredTasks);
                 }
             } catch (error) {
                 console.error('Error loading tasks:', error);
             }
         };
         loadTasks();
-    }, [fetchTasks]);
+    }, [fetchTasks, id]);
 
     const handleAddTask = async (e) => {
         e.preventDefault();
@@ -60,23 +60,24 @@ const Tasks = () => {
             try {
                 const newTask = await addTask({ title, entry: id, checked });
                 console.log("New task added: ", newTask);
-                setTasks([...tasks, newTask]);
+                const updatedTasks = [...tasks, newTask];
+                setTasks(updatedTasks);
                 setTitle('');
                 setChecked(false);
-                setTotalTasks(totalTasks + 1);
-                updateBar();
+                setTotalTasks(updatedTasks.length);
+                updateBar(categoryColor, completedTasks, updatedTasks.length, categoryTitle);
             } catch (error) {
                 console.error('Error adding task:', error);
             }
         }
     };
 
-    const handleUpdateTask = async (id, title, entry, checked) => {
+    const handleUpdateTask = async (taskId, title, entry, checked) => {
         try {
             // Optimistically update UI
             setTasks((prevTasks) =>
                 prevTasks.map((task) =>
-                    task._id === id ? { ...task, title, entry, checked } : task
+                    task._id === taskId ? { ...task, title, entry, checked } : task
                 )
             );
             // Update the progress bar
@@ -85,13 +86,13 @@ const Tasks = () => {
 
             updateBar(categoryColor, completed, totalTasks, categoryTitle);
             // Await the async update operation
-            const updatedTask = await updateTask(id, { title, entry, checked });
+            const updatedTask = await updateTask(taskId, { title, entry, checked });
             console.log("Task updated: ", updatedTask);
 
             // Ensure UI matches the final updated task from the server
             setTasks((prevTasks) =>
                 prevTasks.map((task) =>
-                    task._id === id ? updatedTask : task
+                    task._id === taskId ? updatedTask : task
                 )
             );
         } catch (error) {
@@ -99,7 +100,7 @@ const Tasks = () => {
             // Revert optimistic update in case of error
             setTasks((prevTasks) =>
                 prevTasks.map((task) =>
-                    task._id === id ? { ...task, title, entry, checked: !checked } : task
+                    task._id === taskId ? { ...task, title, entry, checked: !checked } : task
                 )
             );
         }
@@ -135,9 +136,10 @@ const Tasks = () => {
     const handleDeleteTask = async (taskId) => {
         try {
             await deleteTask(taskId);
-            setTasks(tasks.filter(task => task._id !== taskId));
-            setTotalTasks(totalTasks - 1);
-            updateBar();
+            const updatedTasks = tasks.filter(task => task._id !== taskId);
+            setTasks(updatedTasks);
+            setTotalTasks(updatedTasks.length);
+            updateBar(categoryColor, completedTasks, updatedTasks.length, categoryTitle);
         } catch (error) {
             console.error('Error deleting task:', error);
         }
@@ -153,7 +155,7 @@ const Tasks = () => {
     return (
         <div className="PageContainer">
             <div id="topContainer">
-                <div id="backButtonContainer">
+                <div id="backButtonContainer" onClick={() => document.location.href = '/'}>
                     <div id="backIcon"></div>
                     <p>Start</p>
                 </div>

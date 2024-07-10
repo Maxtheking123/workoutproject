@@ -172,6 +172,10 @@ const Calendar = () => {
                 const eventsContainer = document.createElement('div');
                 eventsContainer.className = 'eventContainer';
                 eventsContainer.dataset.id = entry._id;
+                // onclick redirect to the tasks page
+                eventsContainer.onclick = () => {
+                    window.location.href = `/tasks/${entry._id}`;
+                };
 
                 // Get the category details from the mapping
                 const category = categoryMap[entry.category] || { title: 'Unknown Category', color: '#ffffff' };
