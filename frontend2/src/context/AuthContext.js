@@ -40,18 +40,6 @@ const AuthProvider = ({ children }) => {
         }
     };
 
-    const addCategory = async (category) => {
-        const newCategory = { ...category, id: uuidv4() };
-        try {
-            const response = await axiosInstance.post('/api/categories/entries', newCategory);
-            setCategories(prevCategories => [...prevCategories, response.data]); // Update the categories state
-            return response.data;
-        } catch (error) {
-            console.error('Error adding category:', error);
-            throw error;
-        }
-    };
-
     const login = async (username, password) => {
         try {
             const response = await axiosInstance.post('/api/auth/login', { username, password });
@@ -112,6 +100,18 @@ const AuthProvider = ({ children }) => {
         }
     };
 
+    const addCategory = async (category) => {
+        const newCategory = { ...category, id: uuidv4() };
+        try {
+            const response = await axiosInstance.post('/api/categories/entries', newCategory);
+            setCategories(prevCategories => [...prevCategories, response.data]); // Update the categories state
+            return response.data;
+        } catch (error) {
+            console.error('Error adding category:', error);
+            throw error;
+        }
+    };
+
     const updateCalendarEntry = async (id, entry) => {
         try {
             const response = await axiosInstance.put(`/api/calendar/entries/${id}`, entry);
@@ -131,6 +131,17 @@ const AuthProvider = ({ children }) => {
             throw error;
         }
     };
+
+    const deleteCategory = async (id) => {
+        try {
+            const response = await axiosInstance.delete(`/api/categories/entries/${id}`);
+            setCategories(prevCategories => prevCategories.filter(category => category.id !== id)); // Update the categories state
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting category:', error);
+            throw error;
+        }
+    }
 
     const fetchTasks = async () => {
         try {
@@ -178,7 +189,7 @@ const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, fetchCalendarEntries, addCalendarEntry, updateCalendarEntry, deleteCalendarEntry, categories, addCategory, fetchCategoryEntries, fetchTasks, addTask, updateTask, deleteTask }}>
+        <AuthContext.Provider value={{ user, login, register, logout, fetchCalendarEntries, addCalendarEntry, updateCalendarEntry, deleteCalendarEntry, categories, addCategory, fetchCategoryEntries, fetchTasks, addTask, updateTask, deleteTask, deleteCategory }}>
             {children}
         </AuthContext.Provider>
     );
