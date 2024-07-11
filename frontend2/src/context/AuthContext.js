@@ -27,13 +27,24 @@ const AuthProvider = ({ children }) => {
             }
         }
         setLoading(false);
-        fetchCategories(); // Fetch categories when the component mounts
+        loadCategories(); // Load categories when the component mounts
     }, []);
+
+    const loadCategories = async () => {
+        const localCategories = localStorage.getItem('categoryEntries');
+        if (localCategories) {
+            setCategories(JSON.parse(localCategories));
+        } else {
+            console.log('Fetching categories from the server');
+        }
+    };
 
     const fetchCategories = async () => {
         try {
             const response = await axiosInstance.get('/api/categories/entries');
-            setCategories(response.data || []); // Ensure the response is an array
+            const categoryData = response.data || [];
+            setCategories(categoryData); // Ensure the response is an array
+            localStorage.setItem('categoryEntries', JSON.stringify(categoryData));
         } catch (error) {
             console.error('Error fetching categories:', error);
             setCategories([]); // Fallback to an empty array on error
@@ -104,7 +115,11 @@ const AuthProvider = ({ children }) => {
         const newCategory = { ...category, id: uuidv4() };
         try {
             const response = await axiosInstance.post('/api/categories/entries', newCategory);
-            setCategories(prevCategories => [...prevCategories, response.data]); // Update the categories state
+            setCategories(prevCategories => {
+                const updatedCategories = [...prevCategories, response.data];
+                localStorage.setItem('categoryEntries', JSON.stringify(updatedCategories));
+                return updatedCategories;
+            }); // Update the categories state
             return response.data;
         } catch (error) {
             console.error('Error adding category:', error);
@@ -135,20 +150,24 @@ const AuthProvider = ({ children }) => {
     const deleteCategory = async (id) => {
         try {
             const response = await axiosInstance.delete(`/api/categories/entries/${id}`);
-            setCategories(prevCategories => prevCategories.filter(category => category.id !== id)); // Update the categories state
+            setCategories(prevCategories => {
+                const updatedCategories = prevCategories.filter(category => category.id !== id);
+                localStorage.setItem('categoryEntries', JSON.stringify(updatedCategories));
+                return updatedCategories;
+            }); // Update the categories state
             return response.data;
         } catch (error) {
             console.error('Error deleting category:', error);
             throw error;
         }
-    }
+    };
 
     const fetchTasks = async () => {
         try {
             const response = await axiosInstance.get('/api/tasks/entries');
             return response.data;
         } catch (error) {
-            console.error('Error fetching category entries:', error);
+            console.error('Error fetching tasks:', error);
             throw error;
         }
     };
@@ -159,7 +178,7 @@ const AuthProvider = ({ children }) => {
             const response = await axiosInstance.post('/api/tasks/entries', entry);
             return response.data;
         } catch (error) {
-            console.error('Error adding calendar entry:', error);
+            console.error('Error adding task:', error);
             throw error;
         }
     };
@@ -169,7 +188,7 @@ const AuthProvider = ({ children }) => {
             const response = await axiosInstance.put(`/api/tasks/entries/${id}`, entry);
             return response.data;
         } catch (error) {
-            console.error('Error updating calendar entry:', error);
+            console.error('Error updating task:', error);
             throw error;
         }
     };
@@ -179,7 +198,7 @@ const AuthProvider = ({ children }) => {
             const response = await axiosInstance.delete(`/api/tasks/entries/${id}`);
             return response.data;
         } catch (error) {
-            console.error('Error deleting calendar entry:', error);
+            console.error('Error deleting task:', error);
             throw error;
         }
     };

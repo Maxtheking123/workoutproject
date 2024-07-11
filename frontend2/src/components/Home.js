@@ -1,15 +1,16 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
-import { AuthContext } from "../context/AuthContext";
+import React, { useEffect, useState, useRef } from 'react';
+import { getAndSaveLocalData } from "../utils/getAndSaveLocalData";
 import { parseISO, addDays, startOfDay, endOfDay, format } from 'date-fns';
 import checkIcon from '../images/checkIcon.svg';
 import calendarSvg from "../images/calender.svg";
 import backIcon from "../images/backArrow.svg";
 
 const Home = () => {
-    const { fetchCalendarEntries, addCalendarEntry, updateCalendarEntry, deleteCalendarEntry, categories, addCategory } = useContext(AuthContext);
+    const { updateEntriesFromDatabase, getLocalData, addCategoryGlobal, addTaskGlobal, addCalendarEntryGlobal, updateCalendarEntryGlobal, updateTaskGlobal, deleteCalendarEntryGlobal, deleteCategoryGlobal, deleteTaskGlobal } = getAndSaveLocalData();
     const [entries, setEntries] = useState([]);
     const [newEntry, setNewEntry] = useState({ title: '', description: '', date: '', category: '' });
     const [newCategory, setNewCategory] = useState({ title: '', color: '#F88D2B' });
+    const [categories, setCategories] = useState([]);
     const [editingEntry, setEditingEntry] = useState(null);
     const [draggedEntry, setDraggedEntry] = useState(null);
     const entryRefs = useRef({});
@@ -18,13 +19,13 @@ const Home = () => {
     const daysForward = 6;
 
     useEffect(() => {
-    const getEntries = async () => {
-        const fetchedEntries = await fetchCalendarEntries();
-        setEntries(fetchedEntries);
-    };
-
-        getEntries();
-    }, [fetchCalendarEntries, categories]);
+        const loadLocalData = () => {
+            const { calendarEntries, categoryEntries, Tasks } = getLocalData();
+            setEntries(calendarEntries);
+            setCategories(categoryEntries);
+        };
+        loadLocalData();
+    }, []);
 
     const updateSelectedCategory = () => {
         const checkboxIcons = document.querySelectorAll('.checkboxIcon');
@@ -77,7 +78,7 @@ const Home = () => {
             return;
         }
         console.log('Selected category:', selectedCategory);
-        const addedEntry = await addCalendarEntry({ ...newEntry, category: selectedCategory });
+        const addedEntry = await addCalendarEntryGlobal({ ...newEntry, category: selectedCategory });
         setEntries([...entries, addedEntry]);
         setNewEntry({ title: '', description: '', date: '', category: '' });
         cancel();
@@ -85,13 +86,13 @@ const Home = () => {
 
     const handleUpdateEntry = async (e) => {
         e.preventDefault();
-        const updated = await updateCalendarEntry(editingEntry._id, editingEntry);
+        const updated = await updateCalendarEntryGlobal(editingEntry._id, editingEntry);
         setEntries(entries.map(entry => (entry._id === editingEntry._id ? updated : entry)));
         setEditingEntry(null);
     };
 
     const handleDeleteEntry = async (id) => {
-        await deleteCalendarEntry(id);
+        await deleteCalendarEntryGlobal(id);
         setEntries(entries.filter(entry => entry._id !== id));
     };
 
@@ -102,7 +103,8 @@ const Home = () => {
     const handleAddCategory = async (e) => {
         e.preventDefault();
         closeCreateCategory();
-        const addedCategory = await addCategory(newCategory);
+        const addedCategory = await addCategoryGlobal(newCategory);
+        setCategories([...categories, addedCategory]);
         setNewCategory({ title: '', color: '#F88D2B' }); // Reset color to default after adding
 
         // Optionally, you can set the new category as the selected category
@@ -177,33 +179,33 @@ const Home = () => {
         e.preventDefault();
         const draggedEntry = JSON.parse(e.dataTransfer.getData("entry"));
         console.log('Dropped entry:', draggedEntry);
-            const droppedDayContainer = e.currentTarget.closest('.dayContainer');
-    console.log('Dropped day container:', droppedDayContainer);
+        const droppedDayContainer = e.currentTarget.closest('.dayContainer');
+        console.log('Dropped day container:', droppedDayContainer);
 
-    const draggingElement = document.querySelector('.dragging');
-    const startingDayContainer = draggingElement ? draggingElement.closest('.dayContainer') : null;
-    console.log('Starting day container:', startingDayContainer);
+        const draggingElement = document.querySelector('.dragging');
+        const startingDayContainer = draggingElement ? draggingElement.closest('.dayContainer') : null;
+        console.log('Starting day container:', startingDayContainer);
 
-    if (droppedDayContainer && startingDayContainer) {
-        draggingElement.classList.remove('dragging');
-        const dummyEvent = document.getElementById('dummyEvent');
-        dummyEvent.style.display = 'none';
+        if (droppedDayContainer && startingDayContainer) {
+            draggingElement.classList.remove('dragging');
+            const dummyEvent = document.getElementById('dummyEvent');
+            dummyEvent.style.display = 'none';
 
-        const siblings = droppedDayContainer.children;
-        for (let i = 0; i < siblings.length; i++) {
-            siblings[i].style.display = 'block';
+            const siblings = droppedDayContainer.children;
+            for (let i = 0; i < siblings.length; i++) {
+                siblings[i].style.display = 'block';
+            }
+
+            const newDate = droppedDayContainer.getAttribute('data-date');
+            console.log('New date:', newDate);
+
+            const updatedEntry = { ...draggedEntry, date: newDate };
+            console.log('Updated entry:', updatedEntry);
+
+            await updateCalendarEntryGlobal(draggedEntry._id, updatedEntry);
+            setEntries(entries.map(e => (e._id === draggedEntry._id ? updatedEntry : e)));
         }
-
-        const newDate = droppedDayContainer.getAttribute('data-date');
-        console.log('New date:', newDate);
-
-        const updatedEntry = { ...draggedEntry, date: newDate };
-        console.log('Updated entry:', updatedEntry);
-
-        await updateCalendarEntry(draggedEntry._id, updatedEntry);
-        setEntries(entries.map(e => (e._id === draggedEntry._id ? updatedEntry : e)));
-    }
-};
+    };
 
 const today = startOfDay(new Date());
 const endDate = endOfDay(addDays(today, daysForward));

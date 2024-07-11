@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './components/Home';
 import Login from './components/Login';
 import Register from './components/Register';
 import Chart from './components/Chart';
 import Calendar from './components/Calendar';
+import Tasks from './components/Tasks';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Tasks from './components/Tasks';
+import { getAndSaveLocalData } from './utils/getAndSaveLocalData';
 
 const App = () => {
     return (
@@ -23,6 +24,14 @@ const App = () => {
 
 const Main = () => {
     const location = useLocation();
+    const { updateEntriesFromDatabase, getLocalData } = getAndSaveLocalData();
+
+    useEffect(() => {
+        const { calendarEntries, categoryEntries, Tasks } = getLocalData();
+        if (!calendarEntries || !categoryEntries || !Tasks) {
+            updateEntriesFromDatabase();  // You might need to pass a userID if required
+        }
+    }, [updateEntriesFromDatabase, getLocalData]);
 
     return (
         <>

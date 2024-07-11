@@ -2,10 +2,11 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import '../css/Tasks.css';
 import { useParams } from 'react-router-dom';
+import { getAndSaveLocalData } from "../utils/getAndSaveLocalData";
 
 const Tasks = () => {
     const { id } = useParams();
-    const { user, addTask, fetchTasks, updateTask, deleteTask, fetchCategoryEntries, fetchCalendarEntries } = useContext(AuthContext);
+    const { updateEntriesFromDatabase, getLocalData, addCategoryGlobal, addTaskGlobal, addCalendarEntryGlobal, updateCalendarEntryGlobal, updateTaskGlobal, deleteCalendarEntryGlobal, deleteCategoryGlobal, deleteTaskGlobal } = getAndSaveLocalData();
     const [tasks, setTasks] = useState([]);
     const [title, setTitle] = useState('');
     const [checked, setChecked] = useState(false);
@@ -22,10 +23,13 @@ const Tasks = () => {
     useEffect(() => {
         const loadTasks = async () => {
             try {
-                const userTasks = await fetchTasks();
-                const userCategories = await fetchCategoryEntries();
-                const userEntries = await fetchCalendarEntries();
-
+                const localData = getLocalData();
+                const userEntries = localData.calendarEntries;
+                const userCategories = localData.categoryEntries;
+                const userTasks = localData.Tasks;
+                console.log('userEntries:', userEntries);
+                console.log('userCategories:', userCategories);
+                console.log('userTasks:', userTasks);
                 const entry = userEntries.find((entry) => entry._id === id);
                 const category = userCategories.find((category) => category._id === entry.category);
 
@@ -52,13 +56,13 @@ const Tasks = () => {
             }
         };
         loadTasks();
-    }, [fetchTasks, id]);
+    }, [id]);
 
     const handleAddTask = async (e) => {
         e.preventDefault();
         if (title) {
             try {
-                const newTask = await addTask({ title, entry: id, checked });
+                const newTask = await addTaskGlobal({ title, entry: id, checked });
                 console.log("New task added: ", newTask);
                 const updatedTasks = [...tasks, newTask];
                 setTasks(updatedTasks);
@@ -74,6 +78,7 @@ const Tasks = () => {
 
     const handleUpdateTask = async (taskId, title, entry, checked) => {
         try {
+            console.log('taskId:', taskId);
             // Optimistically update UI
             setTasks((prevTasks) =>
                 prevTasks.map((task) =>
@@ -81,13 +86,14 @@ const Tasks = () => {
                 )
             );
             // Update the progress bar
-            const completed = checked ? completedTasks + 1 : completedTasks - 1;
+            const checkboxElements = document.querySelectorAll('input[type="checkbox"]');
+            const completed = Array.from(checkboxElements).filter((checkbox) => checkbox.checked).length;
             setCompletedTasks(completed);
 
             updateBar(categoryColor, completed, totalTasks, categoryTitle);
             // Await the async update operation
-            const updatedTask = await updateTask(taskId, { title, entry, checked });
-            console.log("Task updated: ", updatedTask);
+            const updatedTask = await updateTaskGlobal(taskId, { title, entry, checked });
+            console.log("Task updated: ", taskId, { title, entry, checked });
 
             // Ensure UI matches the final updated task from the server
             setTasks((prevTasks) =>
@@ -135,7 +141,7 @@ const Tasks = () => {
 
     const handleDeleteTask = async (taskId) => {
         try {
-            await deleteTask(taskId);
+            await deleteTaskGlobal(taskId);
             const updatedTasks = tasks.filter(task => task._id !== taskId);
             setTasks(updatedTasks);
             setTotalTasks(updatedTasks.length);
@@ -233,6 +239,6 @@ const Tasks = () => {
             </div>
         </div>
     );
-};
+}
 
 export default Tasks;
