@@ -19,7 +19,7 @@ const Login = () => {
             <div id="formContainer">
                 <form onSubmit={handleSubmit}>
                     <div className="inputGroup">
-                        <label htmlFor="usernameInput">Username</label>
+                        <label htmlFor="usernameInput">Email</label>
                         <input
                             id = "usernameInput"
                             type="text"
