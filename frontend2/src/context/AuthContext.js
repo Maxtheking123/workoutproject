@@ -1,41 +1,57 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { decodeToken } from '../utils/decodeToken';
-import { v4 as uuidv4 } from 'uuid'; // Import UUID for generating unique IDs
+import { v4 as uuidv4 } from 'uuid';
 
 const AuthContext = createContext();
 
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:3000', // Set your base URL here
+    baseURL: 'http://localhost:3000',
 });
 
+axiosInstance.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response && error.response.status === 401) {
+            if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+                window.location.href = '/login';
+            }
+            // Prevent the error from being propagated
+            return new Promise(() => {});
+        }
+        return Promise.reject(error);
+    }
+);
+
 const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState();
+    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState([]); // Initialize as an array
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             try {
                 const decodedToken = decodeToken(token);
                 setUser({ username: decodedToken.username });
+                axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                loadCategories();
             } catch (error) {
                 console.error('Invalid token:', error);
                 logout();
             }
+        } else {
+            setLoading(false);
         }
-        setLoading(false);
-        loadCategories(); // Load categories when the component mounts
     }, []);
 
     const loadCategories = async () => {
         const localCategories = localStorage.getItem('categoryEntries');
         if (localCategories) {
             setCategories(JSON.parse(localCategories));
+            setLoading(false);
         } else {
-            console.log('Fetching categories from the server');
+            fetchCategories();
         }
     };
 
@@ -43,11 +59,13 @@ const AuthProvider = ({ children }) => {
         try {
             const response = await axiosInstance.get('/api/categories/entries');
             const categoryData = response.data || [];
-            setCategories(categoryData); // Ensure the response is an array
+            setCategories(categoryData);
             localStorage.setItem('categoryEntries', JSON.stringify(categoryData));
         } catch (error) {
             console.error('Error fetching categories:', error);
-            setCategories([]); // Fallback to an empty array on error
+            setCategories([]);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -59,6 +77,7 @@ const AuthProvider = ({ children }) => {
             axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             const decodedToken = decodeToken(token);
             setUser({ username: decodedToken.username });
+            window.location.href = '/'; // Redirect to home or another protected route
         } catch (error) {
             console.error('Login error:', error);
             throw error;
@@ -78,6 +97,7 @@ const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
         delete axiosInstance.defaults.headers.common['Authorization'];
         setUser(null);
+        window.location.href = '/login'; // Redirect to login page
     };
 
     const fetchCalendarEntries = async () => {
@@ -101,7 +121,6 @@ const AuthProvider = ({ children }) => {
     };
 
     const addCalendarEntry = async (entry) => {
-        console.log('entry:', entry);
         try {
             const response = await axiosInstance.post('/api/calendar/entries', entry);
             return response.data;
@@ -119,7 +138,7 @@ const AuthProvider = ({ children }) => {
                 const updatedCategories = [...prevCategories, response.data];
                 localStorage.setItem('categoryEntries', JSON.stringify(updatedCategories));
                 return updatedCategories;
-            }); // Update the categories state
+            });
             return response.data;
         } catch (error) {
             console.error('Error adding category:', error);
@@ -154,7 +173,7 @@ const AuthProvider = ({ children }) => {
                 const updatedCategories = prevCategories.filter(category => category.id !== id);
                 localStorage.setItem('categoryEntries', JSON.stringify(updatedCategories));
                 return updatedCategories;
-            }); // Update the categories state
+            });
             return response.data;
         } catch (error) {
             console.error('Error deleting category:', error);
@@ -173,7 +192,6 @@ const AuthProvider = ({ children }) => {
     };
 
     const addTask = async (entry) => {
-        console.log('entry:', entry);
         try {
             const response = await axiosInstance.post('/api/tasks/entries', entry);
             return response.data;

@@ -8,6 +8,7 @@ const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const { register } = useContext(AuthContext);
+    const { login } = useContext(AuthContext);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -17,8 +18,11 @@ const Register = () => {
         }
         try {
             await register(username, password);
-            document.location.href = '/login';
+            // automatically login after registration
+            await login(username, password);
+            document.location.href = '/';
         } catch (err) {
+            console.error('Registration error:', err);
             setError('Registration failed');
         }
     };
