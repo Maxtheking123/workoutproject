@@ -5,6 +5,15 @@
     box-shadow: none;
     width: auto;
     padding: 5px;
+    margin-top: 2px;
+}
+
+#inputHeading {
+    font-size: 16px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-top: 4px;
+    padding-left: 4px;
 }
 
 #passwordInput {
@@ -15,6 +24,7 @@
     box-shadow: none;
     background-color: #5C5C5C;
     padding: 5px;
+    margin-top: 2px;
 }
 
 
@@ -41,23 +51,23 @@
 
 #registerLink {
     font-family: "inter", sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     color: #ffffff;
     text-decoration: none;
     position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 30px;
+    left: 30%;
+    transform: translateX(-20%);
 }
 
 .inputGroup {
     background-color: #5C5C5C;
     display: flex;
     flex-direction: column;
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 10px 10px;
     width: 100%;
-        margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 #loginHeader {
@@ -65,19 +75,42 @@
     font-size: 24px;
     font-weight: 300;
     color: #ffffff;
-    margin-bottom: 45px;
-    margin-top: 50px;
+    margin-bottom: 52px;
+    margin-top: 64px;
 }
 
 #loginButton {
     background-color: #929292;
     color: #ffffff;
     border: none;
-    border-radius: 12px;
-    padding: 20px 20px;
+    border-radius: 10px;
+    padding: 12px 20px;
     font-family: "inter", sans-serif;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 300;
     width: calc(100% + 20px);
     cursor: pointer;
+}
+
+#confirmPasswordInput {
+    color: #ffffff;
+    border: none;
+    width: auto;
+    font-size: 16px;
+    box-shadow: none;
+    background-color: #5C5C5C;
+    padding: 5px;
+    margin-top: 2px;
+}
+
+.error {
+    color: red;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+#errorMessage {
+    padding-top: 10px;
+    font-size: 14px;
+    font-weight: 500;
 }

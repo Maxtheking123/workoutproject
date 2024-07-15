@@ -1,33 +1,73 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import '../css/Login.css';
 
 const Register = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
     const { register } = useContext(AuthContext);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await register(username, password);
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
+        try {
+            await register(username, password);
+            document.location.href = '/login';
+        } catch (err) {
+            setError('Registration failed');
+        }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button type="submit">Register</button>
-        </form>
+        <div id="loginContainer">
+            <div id="loginHeader">Sign Up</div>
+            <div id="formContainer">
+                <form onSubmit={handleSubmit}>
+                    <div className="inputGroup">
+                        <label id="inputHeading" htmlFor="usernameInput">Email</label>
+                        <input
+                            id="usernameInput"
+                            type="text"
+                            placeholder="example@email.com"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                    </div>
+                    <div className="inputGroup">
+                        <label id="inputHeading" htmlFor="passwordInput">Password</label>
+                        <input
+                            id="passwordInput"
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
+                    <div className="inputGroup">
+                        <label id="inputHeading" htmlFor="confirmPasswordInput">Confirm Password</label>
+                        <input
+                            id="confirmPasswordInput"
+                            type="password"
+                            placeholder="Confirm Password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                    </div>
+                    <button type="submit" id="loginButton">Register</button>
+                    {error && <div id="errorMessage" className="error">{error}</div>}
+                </form>
+            </div>
+            <div>
+                <a id="registerLink" href="/login">Already have an account? Log in</a>
+            </div>
+        </div>
     );
 };
 
 export default Register;
+// version: "Register form validation" by ChatGPT
