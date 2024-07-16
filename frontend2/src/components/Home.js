@@ -210,7 +210,10 @@ const Home = () => {
 const today = startOfDay(new Date());
 const endDate = endOfDay(addDays(today, daysForward));
 
-const filteredEntries = entries.filter(entry => {
+// remove all entries that are unidentified or null
+    const newEntries = entries.filter(entry => entry !== null && entry !== undefined);
+
+const filteredEntries = newEntries.filter(entry => {
     const entryDate = parseISO(entry.date);
     return entryDate >= today && entryDate <= endDate;
 });
@@ -234,7 +237,6 @@ const groupedEntries = weekDays.map(day => ({
     entries: filteredEntries.map(entry => {
         const category = categories.find(cat => {
             const categoryId = cat._id; // Extract the $oid value
-            console.log('Category ID:', entry.category);
             return categoryId === entry.category;
         });
 

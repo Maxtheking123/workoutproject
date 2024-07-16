@@ -116,6 +116,16 @@ const Tasks = () => {
         const barFill = document.querySelector("#barFill");
         barFill.style.background = color || categoryColor;
         barFill.style.width = `calc(100% * (${completed} / ${total || totalTasks}))`;
+        console.log('completed:', completed);
+        console.log('total:', total);
+        if (completed === total) {
+            const bar = document.querySelector("#barBackground");
+            bar.style.boxShadow = '0px 0px 10px 2px rgb(170, 130, 255)';
+        }
+        else {
+            const bar = document.querySelector("#barBackground");
+            bar.style.boxShadow = 'none';
+        }
     };
 
     const handleClickOutside = (e) => {
