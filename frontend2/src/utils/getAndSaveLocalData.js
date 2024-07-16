@@ -49,19 +49,15 @@ export const getAndSaveLocalData =  () => {
         localStorage.setItem('calendarEntries', JSON.stringify(calendarEntries));
     };
     const updateTaskGlobal = async (id, entry) => {
-    console.log('id:', id);
-    console.log('entry:', entry);
-    const updateTaskData = await updateTask(id, entry);
-    const Tasks = getLocalData().Tasks;
-    const index = Tasks.findIndex((e) => e._id === id);
-
-    // Ensure _id is included in the updated entry
-    Tasks[index] = { ...entry, _id: id };
-
-    // Save updated tasks to local storage
-    localStorage.setItem('Tasks', JSON.stringify(Tasks));
-    return updateTaskData;
-};
+        console.log('id:', id);
+        console.log('entry:', entry);
+        const updateTaskData = await updateTask(id, entry);
+        const Tasks = getLocalData().Tasks;
+        const index = Tasks.findIndex((e) => e._id === id);
+        Tasks[index] = entry;
+        localStorage.setItem('Tasks', JSON.stringify(Tasks));
+        return updateTaskData;
+    };
     const deleteCalendarEntryGlobal = async (id) => {
         await deleteCalendarEntry(id);
         const calendarEntries = getLocalData().calendarEntries;

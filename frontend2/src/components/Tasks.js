@@ -119,9 +119,9 @@ const Tasks = () => {
         barFill.style.width = `calc(100% * (${completed} / ${total || totalTasks}))`;
         console.log('completed:', completed);
         console.log('total:', total);
-        if (completed === total) {
+        if (completed === total && total > 0) {
             const bar = document.querySelector("#barBackground");
-            bar.style.boxShadow = '0px 0px 10px 2px rgb(170, 130, 255)';
+            bar.style.boxShadow = '0px 0px 10px 2px' + color || categoryColor;
         }
         else {
             const bar = document.querySelector("#barBackground");
