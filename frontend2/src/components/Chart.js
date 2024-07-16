@@ -1,14 +1,16 @@
-import React, { useContext, useState, useEffect, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { AuthContext } from "../context/AuthContext";
 import '../css/Chart.css';
 import backIcon from "../images/backArrow.svg";
+import { getAndSaveLocalData } from "../utils/getAndSaveLocalData";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Chart = () => {
-    const { fetchCalendarEntries, fetchCategoryEntries } = useContext(AuthContext);
+    const { updateEntriesFromDatabase, getLocalData, addCategoryGlobal, addTaskGlobal, addCalendarEntryGlobal, updateCalendarEntryGlobal, updateTaskGlobal, deleteCalendarEntryGlobal, deleteCategoryGlobal, deleteTaskGlobal } = getAndSaveLocalData();
+
     const [chartData, setChartData] = useState(null);
     const [chartPercentages, setChartPercentages] = useState(null);
     const [chartTitles, setChartTitles] = useState(null);
@@ -16,6 +18,8 @@ const Chart = () => {
     const [timeFrame, setTimeFrame] = useState(-7);
     const [allEntries, setAllEntries] = useState([]);
     const [allCategories, setAllCategories] = useState([]);
+
+    const memoizedGetLocalData = useMemo(() => getLocalData, []);
 
     const updateTimeFrame = useCallback(() => {
         let newTimeFrame = -7;
@@ -102,14 +106,15 @@ const Chart = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const fetchedEntries = await fetchCalendarEntries();
-            const fetchedCategories = await fetchCategoryEntries();
+            const localData = memoizedGetLocalData();
+            const fetchedEntries = localData.calendarEntries;
+            const fetchedCategories = localData.categoryEntries;
             setAllEntries(fetchedEntries);
             setAllCategories(fetchedCategories);
             calculateTimeSinceLast(fetchedEntries, fetchedCategories);
         };
         fetchData();
-    }, [fetchCalendarEntries, fetchCategoryEntries, calculateTimeSinceLast]);
+    }, [memoizedGetLocalData, calculateTimeSinceLast]);
 
     useEffect(() => {
         updateTimeFrame();
@@ -157,7 +162,7 @@ const Chart = () => {
             </div>
             <div id="chartContainer">
                 {chartData ? (
-                    <Pie data={chartData} options={options}/>
+                    <Pie data={chartData} options={options} />
                 ) : (
                     <p>Loading...</p>
                 )}
@@ -167,7 +172,7 @@ const Chart = () => {
                     {chartPercentages ? (
                         chartPercentages.map((percentage, index) => (
                             <div key={index} className="percentage">
-                                <div className="color" style={{backgroundColor: chartData.datasets[0].backgroundColor[index]}}></div>
+                                <div className="color" style={{ backgroundColor: chartData.datasets[0].backgroundColor[index] }}></div>
                                 <div className="percentageNumber">{percentage.toFixed(0)}%</div>
                                 <div className="label">{chartTitles[index]}</div>
                             </div>
@@ -180,7 +185,7 @@ const Chart = () => {
                     <div id="timeSinceLastTitle">Time since last workout</div>
                     {timeSinceLast ? (
                         timeSinceLast.map((time, index) => (
-                            <div key={index} className="timeSinceLast" style={{display: time < 0 ? 'none' : 'flex' }}>
+                            <div key={index} className="timeSinceLast" style={{ display: time < 0 ? 'none' : 'flex' }}>
                                 <div className="label">{allCategories[index]?.title}</div>
                                 <div className="time">{time > -1 ? (time + (time === 1 ? ' day' : ' days')) : 'Never'}</div>
                             </div>

@@ -15,9 +15,10 @@ export const getAndSaveLocalData =  () => {
         const calendarEntries = JSON.parse(localStorage.getItem('calendarEntries'));
         const categoryEntries = JSON.parse(localStorage.getItem('categoryEntries'));
         const Tasks = JSON.parse(localStorage.getItem('Tasks'));
-        console.log('calendarEntries exported:', calendarEntries);
+        /*console.log('calendarEntries exported:', calendarEntries);
         console.log('categoryEntries exported:', categoryEntries);
-        console.log('Tasks exported:', Tasks);
+        console.log('Tasks exported:', Tasks);*/
+        console.log("got local data")
         return { calendarEntries, categoryEntries, Tasks };
     };
     const addCategoryGlobal = async (category) => {

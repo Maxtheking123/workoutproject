@@ -2,36 +2,40 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import '../css/Calendar.css';
 import backIcon from '../images/backArrow.svg';
+import { getAndSaveLocalData } from "../utils/getAndSaveLocalData";
 
 const Calendar = () => {
-    const { fetchCalendarEntries, fetchCategoryEntries } = useContext(AuthContext);
+    const { updateEntriesFromDatabase, getLocalData, addCategoryGlobal, addTaskGlobal, addCalendarEntryGlobal, updateCalendarEntryGlobal, updateTaskGlobal, deleteCalendarEntryGlobal, deleteCategoryGlobal, deleteTaskGlobal } = getAndSaveLocalData();
     const [daysInMonth, setDaysInMonth] = useState([]);
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
     useEffect(() => {
         populateCalendar(currentMonth, currentYear);
-        updateConicGradients(currentMonth, currentYear);
     }, [currentMonth, currentYear]);
 
+    useEffect(() => {
+        updateConicGradients(currentMonth, currentYear);
+    }, [daysInMonth]);
+
     const populateCalendar = (month, year) => {
-        const firstDayOfMonth = new Date(year, month, 1).getDay(); // get the day of the week the month starts on
-        const daysInCurrentMonth = new Date(year, month + 1, 0).getDate(); // get the number of days in the month
+    const firstDayOfMonth = (new Date(year, month, 1).getDay() + 6) % 7; // Adjust to make Monday the first day of the week
+    const daysInCurrentMonth = new Date(year, month + 1, 0).getDate();
 
-        let daysArray = [];
-        for (let i = 0; i < firstDayOfMonth-1; i++) {
-            daysArray.push(null); // fill in empty slots for days before the 1st of the month
-        }
-        for (let i = 1; i <= daysInCurrentMonth; i++) {
-            daysArray.push(i);
-        }
+    let daysArray = [];
+    for (let i = 0; i < firstDayOfMonth; i++) {
+        daysArray.push(null);
+    }
+    for (let i = 1; i <= daysInCurrentMonth; i++) {
+        daysArray.push(i);
+    }
 
-        setDaysInMonth(daysArray);
-    };
+    setDaysInMonth(daysArray);
+};
 
     const updateConicGradients = async (month, year) => {
         try {
-            const calendarEntries = await fetchCalendarEntries();
+            const calendarEntries = await getLocalData().calendarEntries;
 
             if (!Array.isArray(calendarEntries)) {
                 console.error('calendarEntries is not an array:', calendarEntries);
@@ -53,7 +57,7 @@ const Calendar = () => {
                 categorysThatDay.push(categoriesForDay);
             }
 
-            const categoryEntries = await fetchCategoryEntries();
+            const categoryEntries = getLocalData().categoryEntries;
             const categoryColors = categoryEntries.reduce((acc, category) => {
                 acc[category._id] = category.color;
                 return acc;
@@ -72,6 +76,7 @@ const Calendar = () => {
             });
 
             const dayNumberContainers = document.querySelectorAll('.dayNumberContainer:not(.empty)');
+
             dayNumberContainers.forEach((container, i) => {
                 container.style.backgroundImage = conicGradients[i];
             });
@@ -106,10 +111,7 @@ const Calendar = () => {
         dayNumberSelected.forEach(day => {
             day.classList.remove('selected');
         });
-
-        //update the circle colors
-        updateConicGradients(newMonth, newYear);
-    }
+    };
 
     const changeSelected = (event) => {
         console.log('event:', event.currentTarget)
@@ -126,7 +128,7 @@ const Calendar = () => {
             const day = event.currentTarget.querySelector('.dayNumber').textContent;
             const date = new Date(currentYear, currentMonth, day);
             if (currentYear === new Date().getFullYear()) {
-                dateTitle.innerHTML = date.toLocaleDateString('default', {month: 'long', day: 'numeric'});
+                dateTitle.innerHTML = date.toLocaleDateString('default', { month: 'long', day: 'numeric' });
             }
             else {
                 dateTitle.innerHTML = date.toLocaleDateString('default', {
@@ -139,17 +141,17 @@ const Calendar = () => {
             updateEntries();
         }
 
-    }
+    };
 
     const updateEntries = async () => {
         const entriesContainer = document.querySelector('#entriesContainer');
         entriesContainer.innerHTML = '';
 
         try {
-            const allEntries = await fetchCalendarEntries();
-            const categoryEntries = await fetchCategoryEntries();
+            const localData = getLocalData();
+            const allEntries = localData.calendarEntries;
+            const categoryEntries = localData.categoryEntries;
 
-            // Create a mapping of category _id to its title and color
             const categoryMap = categoryEntries.reduce((acc, category) => {
                 acc[category._id] = { title: category.title, color: category.color };
                 return acc;
@@ -172,15 +174,12 @@ const Calendar = () => {
                 const eventsContainer = document.createElement('div');
                 eventsContainer.className = 'eventContainer';
                 eventsContainer.dataset.id = entry._id;
-                // onclick redirect to the tasks page
                 eventsContainer.onclick = () => {
                     window.location.href = `/tasks/${entry._id}`;
                 };
 
-                // Get the category details from the mapping
                 const category = categoryMap[entry.category] || { title: 'Unknown Category', color: '#ffffff' };
 
-                // Set the background color of the eventsContainer
                 eventsContainer.style.backgroundColor = category.color;
 
                 const eventHeaderTitle = document.createElement('p');
@@ -205,16 +204,15 @@ const Calendar = () => {
         } catch (error) {
             console.error('Error fetching calendar entries:', error);
         }
-};
+    };
 
     const renderDays = () => {
         return daysInMonth.map((day, index) => (
             <div
                 key={index}
-                // make sure if day is null it has class dayNumberSelected also has class empty
                 className="dayNumberSelected"
                 onClick={changeSelected}
-                style={{visibility: day === null ? 'hidden' : 'visible'}}
+                style={{ visibility: day === null ? 'hidden' : 'visible' }}
             >
                 <div className={`dayNumberContainer ${day === null ? 'empty' : ''}`}>
                     <div className="dayNumber">{day}</div>
@@ -224,18 +222,24 @@ const Calendar = () => {
     };
 
     return (
-        <div>
-            <h1>Calendar</h1>
-            <div id="topButtons">
-                <div id="homeButton"></div>
+        <div id = "calenderPage">
+            <div id="topContainer" style={{margin: "0px"}}>
+                <div id="homeButtonContainer" onClick={() => document.location.href = '/'}>
+                    <div className="backIcon" style={{backgroundImage: `url(${backIcon})`, marginLeft: "-5px"}}></div>
+                    <div id="homeButton">Start</div>
+                </div>
+            </div>
+            <div id="topButtons" style={{width: "100%"}}>
                 <div id="secondTopRow">
                     <div id="monthTitleContainer">
-                        <button onClick={() => changeMonth("back")} className="backButton" style={{backgroundImage: `url(${backIcon})`}}></button>
+                        <button onClick={() => changeMonth("back")} className="backButton"
+                                style={{backgroundImage: `url(${backIcon})`}}></button>
                         <span className="monthTitle">
                             {new Date(currentYear, currentMonth).toLocaleString('default', {month: 'long'})}
                             {currentYear !== new Date().getFullYear() && ` ${currentYear}`}
                         </span>
-                        <button onClick={() => changeMonth("next")} className="nextButton" style={{backgroundImage: `url(${backIcon})`}}></button>
+                        <button onClick={() => changeMonth("next")} className="nextButton"
+                                style={{backgroundImage: `url(${backIcon})`}}></button>
                     </div>
                 </div>
             </div>

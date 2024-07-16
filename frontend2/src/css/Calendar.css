@@ -2,6 +2,9 @@ body {
     color: white;
     font-family: "inter", sans-serif;
 }
+#calendarEntries{
+    width: 100%;
+}
 #calendarContainer {
     display: flex;
     flex-direction: column;
@@ -9,21 +12,22 @@ body {
     justify-content: center;
     width: calc(100% - 20px);
     max-width: 400px;
-    padding: 10px;
+    margin-top: 30px;
+    margin-bottom: 10px;
 }
 
 .dayNumberSelected {
     border: 3px solid rgba(175, 175, 175, 0.0);
     border-radius: 50%;
-    width: 11vw;
-    height: 11vw;
+    width: 11.25vw;
+    height: 11.25vw;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .dayNumberSelected.selected {
-    border: 3px solid rgba(175, 175, 175, 0.7);
+    border: 1svw solid rgba(175, 175, 175, 0.7)
 }
 
 .dayNumberContainer {
@@ -33,8 +37,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 10svw;
-    height: 10svw;
+    width: 9.75svw;
+    height: 9.75svw;
 }
 .monthTitle {
     font-size: 20px;
@@ -46,6 +50,9 @@ body {
 
 .dayOfWeek {
     text-align: center;
+    width: calc(11.25vw + 6px);
+    font-size: 16px;
+    font-weight: 300;
 }
 
 .backButton {
@@ -65,8 +72,8 @@ body {
 }
 
 .dayNumber{
-    width: 8svw;
-    height: 8svw;
+    width: 7.5svw;
+    height: 7.5svw;
     background: #181818;
     border-radius: 50%;
     display: flex;
@@ -88,14 +95,51 @@ body {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 2px;
-    width: 100%;
+    width: max-content;
+    font-size: 18px;
 }
+
+#homeButtonContainer {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+#topContainer {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    flex-direction: column;
+
+    color: white;
+    font-family: "inter", sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+}
+
+#dateTitle {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    margin-top: 15px;
+}
+
+#calenderPage{
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 
 #daysOfWeekContainer {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 2px;
-    width: 100%;
+    width: max-content;
 }
 
 .eventContainer {
