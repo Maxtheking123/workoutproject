@@ -21,96 +21,97 @@ const Tasks = () => {
     const editingTaskInputRef = useRef(null);
 
     useEffect(() => {
-        const loadTasks = async () => {
-            try {
-                const localData = getLocalData();
-                const userEntries = localData.calendarEntries;
-                const userCategories = localData.categoryEntries;
-                const userTasks = localData.Tasks;
-                console.log('userEntries:', userEntries);
-                console.log('userCategories:', userCategories);
-                console.log('userTasks:', userTasks);
-                const entry = userEntries.find((entry) => entry._id === id);
-                const category = userCategories.find((category) => category._id === entry.category);
+    const loadTasks = async () => {
+        try {
+            const localData = getLocalData();
+            const userEntries = localData.calendarEntries;
+            const userCategories = localData.categoryEntries;
+            const userTasks = localData.Tasks;
+            console.log('userEntries:', userEntries);
+            console.log('userCategories:', userCategories);
+            console.log('userTasks:', userTasks);
+            const entry = userEntries.find((entry) => entry._id === id);
+            const category = userCategories.find((category) => category._id === entry.category);
 
-                const filteredTasks = userTasks.filter((task) => task.entry === id);
-                setCompletedTasks(filteredTasks.filter((task) => task.checked).length);
-                setTotalTasks(filteredTasks.length);
+            const filteredTasks = userTasks.filter((task) => task.entry === id);
+            setCompletedTasks(filteredTasks.filter((task) => task.checked).length);
+            setTotalTasks(filteredTasks.length);
 
-                setCategoryTitle(category.title);
-                setCategoryColor(category.color);
+            setCategoryTitle(category.title);
+            setCategoryColor(category.color);
 
-                const barHeader = document.querySelector("#barHeader");
-                barHeader.textContent = category.title;
-                barHeader.style.color = category.color;
+            const barHeader = document.querySelector("#barHeader");
+            barHeader.textContent = category.title;
+            barHeader.style.color = category.color;
 
-                updateBar(category.color, filteredTasks.filter((task) => task.checked).length, filteredTasks.length, category.title);
+            updateBar(category.color, filteredTasks.filter((task) => task.checked).length, filteredTasks.length, category.title);
 
-                if (Array.isArray(filteredTasks)) {
-                    setTasks(filteredTasks);
-                } else {
-                    console.error('Expected an array of tasks, received:', filteredTasks);
-                }
-            } catch (error) {
-                console.error('Error loading tasks:', error);
+            if (Array.isArray(filteredTasks)) {
+                setTasks(filteredTasks.map(task => ({ ...task, _id: task._id })));
+            } else {
+                console.error('Expected an array of tasks, received:', filteredTasks);
             }
-        };
-        loadTasks();
-    }, [id]);
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+        }
+    };
+    loadTasks();
+}, [id]);
 
     const handleAddTask = async (e) => {
-        e.preventDefault();
-        if (title) {
-            try {
-                const newTask = await addTaskGlobal({ title, entry: id, checked });
-                console.log("New task added: ", newTask);
-                const updatedTasks = [...tasks, newTask];
-                setTasks(updatedTasks);
-                setTitle('');
-                setChecked(false);
-                setTotalTasks(updatedTasks.length);
-                updateBar(categoryColor, completedTasks, updatedTasks.length, categoryTitle);
-            } catch (error) {
-                console.error('Error adding task:', error);
-            }
+    e.preventDefault();
+    if (title) {
+        try {
+            const newTask = await addTaskGlobal({ title, entry: id, checked });
+            console.log("New task added: ", newTask);
+            const updatedTasks = [...tasks, { ...newTask, _id: newTask._id }];
+            setTasks(updatedTasks);
+            setTitle('');
+            setChecked(false);
+            setTotalTasks(updatedTasks.length);
+            updateBar(categoryColor, completedTasks, updatedTasks.length, categoryTitle);
+        } catch (error) {
+            console.error('Error adding task:', error);
         }
-    };
+    }
+};
 
     const handleUpdateTask = async (taskId, title, entry, checked) => {
-        try {
-            console.log('taskId:', taskId);
-            // Optimistically update UI
-            setTasks((prevTasks) =>
-                prevTasks.map((task) =>
-                    task._id === taskId ? { ...task, title, entry, checked } : task
-                )
-            );
-            // Update the progress bar
-            const checkboxElements = document.querySelectorAll('input[type="checkbox"]');
-            const completed = Array.from(checkboxElements).filter((checkbox) => checkbox.checked).length;
-            setCompletedTasks(completed);
+    try {
+        console.log("task" + taskId, { title, entry, checked })
+        console.log('taskId:', taskId);
+        // Optimistically update UI
+        setTasks((prevTasks) =>
+            prevTasks.map((task) =>
+                task._id === taskId ? { ...task, title, entry, checked } : task
+            )
+        );
+        // Update the progress bar
+        const checkboxElements = document.querySelectorAll('input[type="checkbox"]');
+        const completed = Array.from(checkboxElements).filter((checkbox) => checkbox.checked).length;
+        setCompletedTasks(completed);
 
-            updateBar(categoryColor, completed, totalTasks, categoryTitle);
-            // Await the async update operation
-            const updatedTask = await updateTaskGlobal(taskId, { title, entry, checked });
-            console.log("Task updated: ", taskId, { title, entry, checked });
+        updateBar(categoryColor, completed, totalTasks, categoryTitle);
+        // Await the async update operation
+        const updatedTask = await updateTaskGlobal(taskId, { title, entry, checked });
+        console.log("Task updated: ", taskId, { title, entry, checked });
 
-            // Ensure UI matches the final updated task from the server
-            setTasks((prevTasks) =>
-                prevTasks.map((task) =>
-                    task._id === taskId ? updatedTask : task
-                )
-            );
-        } catch (error) {
-            console.error('Error updating task:', error);
-            // Revert optimistic update in case of error
-            setTasks((prevTasks) =>
-                prevTasks.map((task) =>
-                    task._id === taskId ? { ...task, title, entry, checked: !checked } : task
-                )
-            );
-        }
-    };
+        // Ensure UI matches the final updated task from the server
+        setTasks((prevTasks) =>
+            prevTasks.map((task) =>
+                task._id === taskId ? { ...updatedTask, _id: taskId } : task
+            )
+        );
+    } catch (error) {
+        console.error('Error updating task:', error);
+        // Revert optimistic update in case of error
+        setTasks((prevTasks) =>
+            prevTasks.map((task) =>
+                task._id === taskId ? { ...task, title, entry, checked: !checked } : task
+            )
+        );
+    }
+};
 
     const updateBar = (color, completed, total, categoryTitle) => {
         const barFill = document.querySelector("#barFill");
@@ -187,41 +188,41 @@ const Tasks = () => {
             </div>
             <div>
                 {tasks.length > 0 ? (
-                    tasks.map((task) => (
-                        <div className="taskContainer" key={task._id}>
-                            <label className="control control-checkbox">
-                                <input
-                                    type="checkbox"
-                                    checked={task.checked}
-                                    onChange={(e) => handleUpdateTask(task._id, task.title, task.entry, e.target.checked)}
-                                />
-                                <div className="control_indicator"></div>
-                            </label>
-                            {editingTaskId === task._id ? (
-                                <input
-                                    type="text"
-                                    value={editingTaskTitle}
-                                    onChange={(e) => setEditingTaskTitle(e.target.value)}
-                                    ref={editingTaskInputRef}
-                                    autoFocus
-                                    className="taskTitleInput"
-                                />
-                            ) : (
-                                <p
-                                    className="taskTitle"
-                                    onClick={() => {
-                                        setEditingTaskId(task._id);
-                                        setEditingTaskTitle(task.title);
-                                    }}
-                                >
-                                    {task.title}
-                                </p>
-                            )}
-                        </div>
-                    ))
-                ) : (
-                    <div>No tasks available</div>
-                )}
+    tasks.map((task) => (
+        <div className="taskContainer" key={task._id}>
+            <label className="control control-checkbox">
+                <input
+                    type="checkbox"
+                    checked={task.checked}
+                    onChange={(e) => handleUpdateTask(task._id, task.title, task.entry, e.target.checked)}
+                />
+                <div className="control_indicator"></div>
+            </label>
+            {editingTaskId === task._id ? (
+                <input
+                    type="text"
+                    value={editingTaskTitle}
+                    onChange={(e) => setEditingTaskTitle(e.target.value)}
+                    ref={editingTaskInputRef}
+                    autoFocus
+                    className="taskTitleInput"
+                />
+            ) : (
+                <p
+                    className="taskTitle"
+                    onClick={() => {
+                        setEditingTaskId(task._id);
+                        setEditingTaskTitle(task.title);
+                    }}
+                >
+                    {task.title}
+                </p>
+            )}
+        </div>
+    ))
+) : (
+    <div>No tasks available</div>
+)}
                 {showNewTaskInput && (
                     <div className="taskContainer" ref={newTaskInputRef}>
                         <label className="control control-checkbox">

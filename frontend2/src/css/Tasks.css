@@ -165,13 +165,14 @@
     background-color: white;
     border-radius: 50px;
     contain: content;
+    box-shadow: none;
+    transition: 0.3s ease;
 }
 
 #barFill {
     width: 0px;
     height: inherit;
     background-color: rgba(255, 255, 255, 0.3);
-    box-shadow: none;
 }
 
 #topContainer{
