@@ -14,5 +14,8 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "build": {
+    "installCommand": "npm install --force"
+  }
 }
