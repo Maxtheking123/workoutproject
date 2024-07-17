@@ -4,12 +4,16 @@
   "description": "A workout project",
   "main": "index.js",
   "scripts": {
+    "install:all": "npm install && npm install --prefix frontend2 && npm install --prefix backend",
     "start": "concurrently \"npm run start:frontend2\" \"npm run start:backend\"",
     "start:frontend2": "npm --prefix frontend2 start",
     "start:backend": "npm --prefix backend start",
     "test": "concurrently \"npm --prefix frontend2 test\" \"npm --prefix backend test\"",
     "lint": "eslint .",
-    "build": "npm --prefix frontend2 run build"
+    "build:frontend": "npm --prefix frontend2 run build",
+    "build:backend": "npm --prefix backend run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "clean": "rm -rf node_modules frontend2/node_modules backend/node_modules"
   },
   "keywords": [],
   "author": "",
