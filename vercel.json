@@ -9,11 +9,11 @@
       }
     }
   ],
+  "installCommand": "npm install --force",
   "routes": [
     {
       "src": "/(.*)",
       "dest": "/index.html"
     }
   ],
-  "installCommand": "npm install --force"
 }
