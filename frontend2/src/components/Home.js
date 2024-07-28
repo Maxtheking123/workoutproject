@@ -19,10 +19,10 @@ const Home = () => {
     const daysForward = 6;
 
     useEffect(() => {
-        const loadLocalData = () => {
-            const { calendarEntries, categoryEntries, Tasks } = getLocalData();
-            setEntries(calendarEntries);
-            setCategories(categoryEntries);
+        const loadLocalData = async () => {
+            const { calendarEntries, categoryEntries, Tasks } = await getLocalData();
+            setEntries(calendarEntries || []);
+            setCategories(categoryEntries || []);
         };
         loadLocalData();
     }, []);
@@ -79,7 +79,9 @@ const Home = () => {
         }
         console.log('Selected category:', selectedCategory);
         const addedEntry = await addCalendarEntryGlobal({ ...newEntry, category: selectedCategory });
-        setEntries([...entries, addedEntry]);
+        console.log(addedEntry);
+        // Update the entries state with the new entry
+        setEntries((prevEntries) => [...prevEntries, addedEntry]);
         setNewEntry({ title: '', description: '', date: '', category: '' });
         cancel();
     };
@@ -91,10 +93,11 @@ const Home = () => {
         setEditingEntry(null);
     };
 
-    const handleDeleteEntry = async (id) => {
-        await deleteCalendarEntryGlobal(id);
-        setEntries(entries.filter(entry => entry._id !== id));
-    };
+    const handleDeleteEntry = async (e, id) => {
+    e.stopPropagation(); // Prevent event bubbling
+    await deleteCalendarEntryGlobal(id);
+    setEntries(entries.filter(entry => entry._id !== id));
+};
 
     const handleEditEntry = (entry) => {
         setEditingEntry(entry);
@@ -103,12 +106,19 @@ const Home = () => {
     const handleAddCategory = async (e) => {
         e.preventDefault();
         closeCreateCategory();
-        const addedCategory = await addCategoryGlobal(newCategory);
-        setCategories([...categories, addedCategory]);
-        setNewCategory({ title: '', color: '#F88D2B' }); // Reset color to default after adding
 
-        // Optionally, you can set the new category as the selected category
-        setSelectedCategory(addedCategory._id);
+        try {
+            const addedCategory = await addCategoryGlobal(newCategory);
+            console.log("New category added: ", addedCategory);
+
+            const updatedCategories = [...categories, { ...addedCategory, _id: addedCategory._id }];
+            setCategories(updatedCategories);
+
+            setNewCategory({ title: '', color: '#F88D2B' }); // Reset color to default after adding
+            setSelectedCategory(addedCategory._id);
+        } catch (error) {
+            console.error("Error adding category: ", error);
+        }
     };
 
     const cancel = () => {
@@ -211,7 +221,10 @@ const today = startOfDay(new Date());
 const endDate = endOfDay(addDays(today, daysForward));
 
 // remove all entries that are unidentified or null
-    const newEntries = entries.filter(entry => entry !== null && entry !== undefined);
+if (entries === null) {
+    setEntries({})
+}
+const newEntries = entries.filter(entry => entry !== null && entry !== undefined);
 
 const filteredEntries = newEntries.filter(entry => {
     const entryDate = parseISO(entry.date);
@@ -332,7 +345,7 @@ return (
                             <div className="eventHeaderTitle">{entry.title}</div>
                             <p className="eventDescription">{entry.description}</p>
                             <p className="eventCategory">{entry.categoryTitle}</p>
-                            <button className="deleteButton" onClick={() => handleDeleteEntry(entry._id)}>Delete
+                            <button className="deleteButton" onClick={(e) => handleDeleteEntry(e, entry._id)}>Delete
                             </button>
                             <button className="editButton" onClick={() => handleEditEntry(entry)}>Edit</button>
                         </div>
@@ -410,6 +423,8 @@ return (
                                 <div className="categoryColor" style={{backgroundColor: category.color}}></div>
                                 <div className="subcontainer">
                                     <p className="categoryTitle">{category.title}</p>
+                                    <button className="delete"
+                                            onClick={() => deleteCategoryGlobal(category._id)}></button>
                                     <div className="checkboxIcon" style={{backgroundImage: `url(${checkIcon})`}}></div>
                                 </div>
                             </div>

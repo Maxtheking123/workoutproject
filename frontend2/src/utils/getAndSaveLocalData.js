@@ -1,5 +1,6 @@
 import {useContext} from "react";
 import {AuthContext} from "../context/AuthContext";
+import { v4 as uuidv4 } from 'uuid';
 
 export const getAndSaveLocalData =  () => {
     const { fetchCalendarEntries, fetchCategoryEntries, fetchTasks, addCategory, addTask, addCalendarEntry, updateCalendarEntry, updateTask, deleteCalendarEntry, deleteCategory, deleteTask } = useContext(AuthContext);
@@ -15,17 +16,31 @@ export const getAndSaveLocalData =  () => {
         const calendarEntries = JSON.parse(localStorage.getItem('calendarEntries'));
         const categoryEntries = JSON.parse(localStorage.getItem('categoryEntries'));
         const Tasks = JSON.parse(localStorage.getItem('Tasks'));
-        /*console.log('calendarEntries exported:', calendarEntries);
+        console.log('calendarEntries exported:', calendarEntries);
         console.log('categoryEntries exported:', categoryEntries);
-        console.log('Tasks exported:', Tasks);*/
+        console.log('Tasks exported:', Tasks);
         console.log("got local data")
         return { calendarEntries, categoryEntries, Tasks };
     };
     const addCategoryGlobal = async (category) => {
-        await addCategory(category);
-        const categoryEntries = getLocalData().categoryEntries;
-        categoryEntries.push(category);
+        const categoryEntries = getLocalData().categoryEntries || [];
+        console.log("pre", categoryEntries);
+
+        // Generate a unique ID
+        const preID = uuidv4();
+        console.log(category, preID);
+
+        // Append the _id to the category object
+        const tempCategory = { ...category, _id: preID };
+
+        // Add the new category to the category entries
+        categoryEntries.push(tempCategory);
+
+        // Update local storage with the new category entries
         localStorage.setItem('categoryEntries', JSON.stringify(categoryEntries));
+
+        // Await the addCategory function with the new category
+        await addCategory(tempCategory);
     };
     const addTaskGlobal = async (task) => {
         const addTaskResponse = await addTask(task);

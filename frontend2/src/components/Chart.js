@@ -183,9 +183,12 @@ const Chart = () => {
                 </div>
                 <div id="timeSinceLastContainer">
                     <div id="timeSinceLastTitle">Time since last workout</div>
+                    <div className="noEventsText" style={{display: timeSinceLast && Object.values(timeSinceLast).every(element => element === null) ? "block" : "none"}}>
+                        There are no events
+                    </div>
                     {timeSinceLast ? (
                         timeSinceLast.map((time, index) => (
-                            <div key={index} className="timeSinceLast" style={{ display: time < 0 ? 'none' : 'flex' }}>
+                            <div key={index} className="timeSinceLast" style={{display: time < 0 || time === null ? 'none' : 'flex'}}>
                                 <div className="label">{allCategories[index]?.title}</div>
                                 <div className="time">{time > -1 ? (time + (time === 1 ? ' day' : ' days')) : 'Never'}</div>
                             </div>

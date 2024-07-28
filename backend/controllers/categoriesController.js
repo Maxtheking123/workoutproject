@@ -55,7 +55,7 @@ exports.deleteEntry = async (req, res) => {
     try {
         const entry = await CategoriesEntry.findOneAndDelete({ _id: id, user: req.user.id });
         if (!entry) {
-            return res.status(404).json({ message: 'Entry not found' });
+            res.status(404).json({ message: 'Entry not found' });
         }
         res.json({ message: 'Entry deleted' });
     } catch (error) {

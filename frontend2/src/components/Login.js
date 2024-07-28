@@ -14,36 +14,38 @@ const Login = () => {
     };
 
     return (
-        <div id="loginContainer">
-            <div id="loginHeader">Login</div>
-            <div id="formContainer">
-                <form onSubmit={handleSubmit}>
-                    <div className="inputGroup">
-                        <label id="inputHeading" htmlFor="usernameInput">Email</label>
-                        <input
-                            id = "usernameInput"
-                            type="text"
-                            placeholder="example@email.com"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
-                    </div>
-                    <div className="inputGroup">
-                        <label id="inputHeading" htmlFor="passwordInput">Password</label>
-                        <input
-                            id = "passwordInput"
-                            type="password"
-                            placeholder="Your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </div>
-                    <button type="submit" id="loginButton">Log in</button>
-                </form>
-            </div>
+        <div id="loginPage">
+            <div id="loginContainer">
+                <div id="loginHeader">Login</div>
+                <div id="formContainer">
+                    <form onSubmit={handleSubmit}>
+                        <div className="inputGroup">
+                            <label id="inputHeading" htmlFor="usernameInput">Email</label>
+                            <input
+                                id = "usernameInput"
+                                type="text"
+                                placeholder="example@email.com"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                            />
+                        </div>
+                        <div className="inputGroup">
+                            <label id="inputHeading" htmlFor="passwordInput">Password</label>
+                            <input
+                                id = "passwordInput"
+                                type="password"
+                                placeholder="Your password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                        <button type="submit" id="loginButton">Log in</button>
+                    </form>
+                </div>
             <div>
                 <a id="registerLink" href="/register">Don’t have any account? Sign up</a>
             </div>
+        </div>
         </div>
     );
 };
